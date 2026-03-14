@@ -3,9 +3,11 @@
 #include "st_output.h"
 #include "st_idle.h"
 
+// https://docs.kernel.org/admin-guide/pm/cpuidle.html
+
 int st_idle(const int core, const char output_mode, const bool modify)
 {
-    if (output_mode == 'h')
+    if ( output_mode == 'h' )
     {
         printf("Idle mode:\n");
         st_output_arguments(core, output_mode, modify);

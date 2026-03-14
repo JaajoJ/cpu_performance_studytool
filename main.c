@@ -5,8 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "st_lib.h"
-#include "st_freq.h"
-#include "st_idle.h"
+#include "st_idle_freq.h"
 #include "st_output.h"
 
 // Main function: entry point for execution
@@ -18,8 +17,6 @@ void help() {
         "Options:\n"
         "  -h            Show this help message and exit\n"
         "  -v            Show program version and exit\n"
-        "  -i            Show CPU idle stats or modify idle settings\n"
-        "  -f            Show CPU frequency stats or modify frequency settings\n"
         "  -c <core>     Select CPU core (default: all cores)\n"
         "  -m            Enable modify mode\n"
         "  -o <mode>     Output format\n"
@@ -53,7 +50,7 @@ int main(int argc, char *argv[]) {
     int modify = false;
     char output_mode = 'h'; // j = json, h = human readable
     
-    while ( (opt = getopt(argc, argv, "hvifo:mc:")) != -1 )
+    while ( (opt = getopt(argc, argv, "hvo:mc:")) != -1 )
     {
         switch (opt) {
 
@@ -65,14 +62,6 @@ int main(int argc, char *argv[]) {
             case 'v':
                 version();
                 return 0;
-                break;
-
-            case 'i':
-                idle_mode = true;
-                break;
-
-            case 'f':
-                freq_mode = true;
                 break;
 
             case 'o':
@@ -108,20 +97,7 @@ int main(int argc, char *argv[]) {
     }
 
     // CURRENT MODE: idle, frequency
-    if ( idle_mode )
-    {
-        return st_idle(core, output_mode, modify);
-    }
-    else if ( freq_mode )
-    {
-        return st_freq(core, output_mode, modify);
-        
-    }
-    else
-    {
-        fprintf(stderr, "%s\n", "Invalid mode...");
-    }
     
-
-    return 0;
+    return st_idle(core, output_mode, modify);
+    
 }
