@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "st_lib.h"
 #include "st_freq.h"
 #include "st_idle.h"
@@ -11,7 +12,28 @@
 // Main function: entry point for execution
 
 void help() {
-    printf("Help text \n");
+    printf(
+        "Usage: program [OPTIONS]\n"
+        "\n"
+        "Options:\n"
+        "  -h            Show this help message and exit\n"
+        "  -v            Show program version and exit\n"
+        "  -i            Show CPU idle stats or modify idle settings\n"
+        "  -f            Show CPU frequency stats or modify frequency settings\n"
+        "  -c <core>     Select CPU core (default: all cores)\n"
+        "  -m            Enable modify mode\n"
+        "  -o <mode>     Output format\n"
+        "                  h  human-readable (default)\n"
+        "                  j  JSON\n"
+        "Examples:\n"
+        "  idlefreq_stat -i\n"
+        "      Show idle information\n"
+        "  idlefreq_stat -f -c 2\n"
+        "      Show frequency information for core 2\n"
+        "  program -i -o json\n"
+        "      Show frequency information in JSON format\n"
+        "\n"
+    );
 }
 
 void version() {
@@ -57,6 +79,10 @@ int main(int argc, char *argv[]) {
                 output_mode = optarg[0];
                 break;
             
+            case 'c':
+                core = atoi(optarg);
+                break;
+
             case 'm':
                 modify = true;
                 break;
