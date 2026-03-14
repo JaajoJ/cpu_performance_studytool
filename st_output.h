@@ -1,0 +1,1 @@
+#define ST_SUPPORTED_OUTPUT "hj"
