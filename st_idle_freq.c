@@ -24,24 +24,28 @@ int read_string_addr(const char * addr, char * buffer, size_t buffer_len)
     return 0;
 }
 
-int read_int_addr(const char * addr, long * output_int)
+int read_int_addr(const char *addr, long *output_int)
 {
     int fd = open(addr, O_RDONLY);
     if (fd < 0) {
         perror("read_int_addr");
-        return 1;
+        return -1;
     }
-    
-    size_t bytes_read;
+
+    ssize_t bytes_read;
     char c;
-    int value = 0;
+    long value = 0;
+
     while ((bytes_read = read(fd, &c, 1)) > 0) {
-        value = value * 10;
-        value += c - '0';
+        if (c < '0' || c > '9')
+            break;
+
+        value = value * 10 + (c - '0');
     }
+
+    close(fd);
 
     *output_int = value;
-
     return 0;
 }
 
@@ -70,10 +74,10 @@ int st_idle_freq(const int core, const char output_mode, const bool modify)
 {
     PackageStats package = st_idle_freq_get_package();
 
+    st_output_arguments(core, output_mode, modify);
     if ( output_mode == 'h' )
     {
         printf("Idle mode:\n");
-        st_output_arguments(core, output_mode, modify);
         st_print_package_stats(&package);
     }
     return 0;

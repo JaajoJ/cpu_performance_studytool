@@ -28,7 +28,7 @@ void st_print_package_stats(const PackageStats *pkg)
 
         printf("  Idle state times:\n");
 
-        for (int state = 0; state < MAXIMUM_C_STATES; state++)
+        for (int state = 0; state < pkg->available_idle_states; state++)
         {
             printf("    C%d : %ld\n",
                    state,
