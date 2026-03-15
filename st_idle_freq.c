@@ -79,6 +79,10 @@ int st_idle_freq(const int core, const char output_mode, const bool modify)
         st_output_arguments(core, output_mode, modify);
         st_print_package_stats(&package);
     }
+    else if (output_mode == 'j')
+    {
+        st_print_package_stats_json(&package);
+    }
     return 0;
 
 }

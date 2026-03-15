@@ -7,4 +7,7 @@
 void st_output_arguments(const int core, const char output_mode, const bool modify);
 
 void st_print_package_stats(const PackageStats *pkg);
+
+void st_print_package_stats_json(const PackageStats *pkg);
+
 #endif

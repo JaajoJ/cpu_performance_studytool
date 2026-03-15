@@ -38,3 +38,31 @@ void st_print_package_stats(const PackageStats *pkg)
 
     printf("\n===========================\n");
 }
+
+void print_json_key(char * key, const int value)
+{
+    printf("\"%s\":%i", key, value);
+}
+
+void st_print_package_stats_json(const PackageStats *pkg)
+{
+    char buf[128] = {0};
+    // PACKAGES metrics
+    printf("{");
+    print_json_key("st.package.online", pkg->online_cpus);
+    // CORE metrics
+    for (int core_number = 0; core_number < pkg->all_cpus; ++core_number)
+    {
+        printf(",");
+        print_json_key("st.core.configured_max_latency", pkg->coreStats[core_number].max_latency);
+        for ( int idle_state = 0; idle_state < pkg->available_idle_states; ++idle_state )
+        {
+            printf(",");
+            sprintf(buf, "st.core.%i.idle_state.%i", core_number, idle_state);
+            print_json_key(buf, pkg->coreStats[core_number].idle_time[idle_state]);
+            
+        }
+    }
+    printf("}");
+    printf("\n");
+}
