@@ -44,8 +44,6 @@ int main(int argc, char *argv[]) {
     int opt;
 
     // Defaults
-    int idle_mode = false;
-    int freq_mode = false;
     int core = -1;
     int modify = false;
     char output_mode = 'h'; // j = json, h = human readable
@@ -98,6 +96,6 @@ int main(int argc, char *argv[]) {
 
     // CURRENT MODE: idle, frequency
     
-    return st_idle(core, output_mode, modify);
+    return st_idle_freq(core, output_mode, modify);
     
 }
