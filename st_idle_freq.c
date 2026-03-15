@@ -165,6 +165,9 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
         }
     }
 
+    // calculate averages
+    
+
 
 
     return 0;
