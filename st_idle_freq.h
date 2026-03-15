@@ -14,7 +14,7 @@
 
 typedef struct  
 {
-    long idle_time[MAXIMUM_C_STATES]; // [0] == POLL: /sys/devices/system/cpu/cpuX/cpuidle/state*/time
+    int idle_time[MAXIMUM_C_STATES]; // [0] == POLL: /sys/devices/system/cpu/cpuX/cpuidle/state*/time
     long max_latency; // Maximum accepted latency: /sys/devices/system/cpu/cpuX/power/pm_qos_resume_latency_us
 } IdleCoreStats;
 
@@ -29,7 +29,7 @@ typedef struct  {
 
 PackageStats st_idle_freq_get_package();
 
-IdleCoreStats st_idle_freq_get_core_idle(const int core_number, const int available_c_states);
+int st_idle_freq_get_core_idle_delta(PackageStats * package_stats);
 
 int st_idle_freq(const int core, const char output_mode, const bool modify);
 

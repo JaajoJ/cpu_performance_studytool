@@ -30,7 +30,7 @@ void st_print_package_stats(const PackageStats *pkg)
 
         for (int state = 0; state < pkg->available_idle_states; state++)
         {
-            printf("    C%d : %ld\n",
+            printf("    C%d : %d\n",
                    state,
                    core->idle_time[state]);
         }

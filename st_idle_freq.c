@@ -74,10 +74,9 @@ int st_idle_freq(const int core, const char output_mode, const bool modify)
 {
     PackageStats package = st_idle_freq_get_package();
 
-    st_output_arguments(core, output_mode, modify);
     if ( output_mode == 'h' )
     {
-        printf("Idle mode:\n");
+        st_output_arguments(core, output_mode, modify);
         st_print_package_stats(&package);
     }
     return 0;
@@ -94,11 +93,11 @@ PackageStats st_idle_freq_get_package()
     package.online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
     package.all_cpus = sysconf(_SC_NPROCESSORS_CONF);
     package.available_idle_states = get_available_c_states();
+    st_idle_freq_get_core_idle_delta(&package);
 
     //printf("this %ld\n", package.all_cpus);
     for ( int core_id = 0; core_id < package.all_cpus; ++core_id )
     {
-        package.coreStats[core_id] = st_idle_freq_get_core_idle(core_id, package.available_idle_states);
         sprintf(addr_buf, CORE_LATENCY_ADDR, core_id);
         read_int_addr(addr_buf, &package.coreStats[core_id].max_latency);
     }
@@ -110,16 +109,60 @@ PackageStats st_idle_freq_get_package()
     return package;
 }
 
-
-IdleCoreStats st_idle_freq_get_core_idle(const int core_number, const int available_c_states)
+int get_core_idle(long * c_state_idle, const int core_number, const int available_c_states)
 {
-    IdleCoreStats stats = {0};
     char addr_buf[128] = "";
     for (int idle_state = 0; idle_state < available_c_states; ++ idle_state )
     {
         sprintf(addr_buf, CORE_STATE_TIME_ADDR, core_number, idle_state);
-        read_int_addr(addr_buf,  &stats.idle_time[idle_state]);
+        read_int_addr(addr_buf,  &c_state_idle[idle_state]);
     }
-    return stats;
+    return 0;
+
+}
+
+int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
+{
+    long c_states_time[MAXIMUM_CORES][MAXIMUM_C_STATES] = {0};
+    long c_states_time_delta[MAXIMUM_C_STATES] = {0};
+    long combined_time = 0;
+
+    for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
+    {
+        get_core_idle(c_states_time[core_number], core_number, package_stats->available_idle_states);
+    }
+
+    sleep(1);
+
+    for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
+    {
+        get_core_idle(c_states_time_delta, core_number, package_stats->available_idle_states);
+
+        for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++idle_state)
+        {
+            c_states_time[core_number][idle_state] = c_states_time_delta[idle_state] - c_states_time[core_number][idle_state];
+        }
+    }
+
+
+
+    // Normalize
+    
+    for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
+    {
+        combined_time = 0;
+        for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++ idle_state )
+        {
+            combined_time += c_states_time[core_number][idle_state];
+        }
+        for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++ idle_state )
+        {
+            package_stats->coreStats[core_number].idle_time[idle_state] = (c_states_time[core_number][idle_state] * 1000) / combined_time;
+        }
+    }
+
+
+
+    return 0;
 
 }
