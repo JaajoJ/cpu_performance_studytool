@@ -159,9 +159,12 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
         {
             combined_time += c_states_time[core_number][idle_state];
         }
-        for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++ idle_state )
+        if ( combined_time )
         {
-            package_stats->coreStats[core_number].idle_time[idle_state] = (c_states_time[core_number][idle_state] * 1000) / combined_time;
+            for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++ idle_state )
+            {
+                package_stats->coreStats[core_number].idle_time[idle_state] = (c_states_time[core_number][idle_state] * 1000) / combined_time;
+            }
         }
     }
 
