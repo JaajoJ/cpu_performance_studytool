@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
 #include "st_output.h"
 #include "st_idle_freq.h"
 
@@ -136,7 +137,7 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
         get_core_idle(c_states_time[core_number], core_number, package_stats->available_idle_states);
     }
 
-    sleep(5);
+    nanosleep(100000); // sleep 100 us
 
     for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
     {
