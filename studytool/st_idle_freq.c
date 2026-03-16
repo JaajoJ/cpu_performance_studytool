@@ -136,7 +136,7 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
         get_core_idle(c_states_time[core_number], core_number, package_stats->available_idle_states);
     }
 
-    sleep(1);
+    sleep(5);
 
     for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
     {
