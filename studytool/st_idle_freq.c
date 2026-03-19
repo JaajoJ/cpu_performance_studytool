@@ -183,7 +183,7 @@ int st_idle_freq_modify()
     int fd;
 
     printf("Enter desired CPU DMA latency in us (example: 100):");
-    if (scanf("%d\n", &desired_cpu_latency_us) != 1)
+    if (scanf("%d", &desired_cpu_latency_us) != 1)
     {
         fprintf(stderr, "Error reading input\n");
         while(getchar() != '\n');
@@ -207,7 +207,8 @@ int st_idle_freq_modify()
         return 1;
     }
 
-    int wait = 0;
+    int wait = getchar();
+    wait = 0;
     while( wait != '\n')
     {
         printf("Press Enter to exit...\n");
