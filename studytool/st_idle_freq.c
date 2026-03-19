@@ -176,3 +176,46 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
     return 0;
 
 }
+
+int st_idle_freq_modify()
+{
+    int desired_cpu_latency_us;
+    int fd;
+
+    printf("Enter desired CPU DMA latency in us (example: 100):");
+    if (scanf("%d", &desired_cpu_latency_us) != 1)
+    {
+        fprintf(stderr, "Error reading input\n");
+        while(getchar() != '\n');
+        return 1;
+    }
+
+    if (desired_cpu_latency_us < 0)
+    {
+        return 1;
+    } 
+
+    fd = open(PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR, O_WRONLY);
+    if (fd == -1) 
+    {
+        fprintf(stderr, "DMA latency unavailable\n");
+        return 1;
+    }
+    if (write(fd, &desired_cpu_latency_us, sizeof(desired_cpu_latency_us)) == -1)
+    {
+        close(fd);
+        return 1;
+    }
+
+    int wait = 0;
+    while( wait != '\n')
+    {
+        printf("Press Enter to exit...\n");
+        wait = getchar();
+    }
+
+    close(fd);
+
+    return 0;
+
+}

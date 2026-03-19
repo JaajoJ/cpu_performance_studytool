@@ -83,7 +83,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // restrictions
+    if (modify)
+    {
+        return st_idle_freq_modify();
+    }
 
     // ALLOWED OUTPUT FORMATS
     const char * supported_outputs = ST_SUPPORTED_OUTPUT;

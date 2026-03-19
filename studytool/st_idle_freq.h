@@ -12,6 +12,8 @@
 #define PACKAGE_CURRENT_GOVERNOR_ADDR "/sys/devices/system/cpu/cpuidle/current_governor_ro"
 #define PACKAGE_ONLINE_CPU_ADDR "/sys/devices/system/cpu/online"
 
+#define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
+
 typedef struct  
 {
     int idle_time[MAXIMUM_C_STATES]; // [0] == POLL: /sys/devices/system/cpu/cpuX/cpuidle/state*/time
@@ -33,5 +35,6 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats);
 
 int st_idle_freq(const int core, const char output_mode, const bool modify);
 
+int st_idle_freq_modify();
 
 #endif
