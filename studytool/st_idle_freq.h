@@ -5,6 +5,10 @@
 #define MAXIMUM_CORES 256
 #define MAXIMUM_GOVERNOR_NAME 32
 
+// CONFIGS
+#define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
+#define ST_CONFIG_DEFAULTS {200,{0}}
+
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
 #define CORE_LATENCY_ADDR "/sys/devices/system/cpu/cpu%i/power/pm_qos_resume_latency_us"
@@ -28,6 +32,16 @@ typedef struct  {
     IdleCoreStats coreStats[MAXIMUM_CORES];
 } PackageStats;
 
+typedef struct 
+{
+    int dma_latency_us;
+    int core_target_c_state[MAXIMUM_CORES];
+} STConfig;
+
+
+int st_get_config(STConfig * config, char * config_path);
+
+int st_set_default_config(char * config_path);
 
 PackageStats st_idle_freq_get_package();
 
@@ -35,6 +49,6 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats);
 
 int st_idle_freq(const int core, const char output_mode, const bool modify);
 
-int st_idle_freq_modify();
+int st_idle_freq_apply(STConfig * config);
 
 #endif

@@ -19,6 +19,7 @@ void help() {
         "  -v            Show program version and exit\n"
         "  -c <core>     Select CPU core (default: all cores)\n"
         "  -m            Enable modify mode\n"
+        "  -a            Enable apply mode\n"
         "  -o <mode>     Output format\n"
         "                  h  human-readable (default)\n"
         "                  j  JSON\n"
@@ -46,9 +47,11 @@ int main(int argc, char *argv[]) {
     // Defaults
     int core = -1;
     int modify = false;
+    int apply = false;
+    int ret = 0;
     char output_mode = 'h'; // j = json, h = human readable
     
-    while ( (opt = getopt(argc, argv, "hvo:mc:")) != -1 )
+    while ( (opt = getopt(argc, argv, "hvo:mac:")) != -1 )
     {
         switch (opt) {
 
@@ -73,6 +76,9 @@ int main(int argc, char *argv[]) {
             case 'm':
                 modify = true;
                 break;
+            case 'a':
+                apply = true;
+                break;
 
             default:
                 fprintf(stderr, "Invalid argument...\n");
@@ -85,7 +91,33 @@ int main(int argc, char *argv[]) {
 
     if (modify)
     {
-        return st_idle_freq_modify();
+        // If file does not exists. Create one...
+        if (access(ST_CONFIG_DEFAULT_PATH, F_OK | R_OK) != 0)
+        {
+            ret = st_set_default_config(ST_CONFIG_DEFAULT_PATH);
+            if( ret )
+            {
+                fprintf(stderr, "Unable to create config file: ");
+                fprintf(stderr, ST_CONFIG_DEFAULT_PATH);
+                fprintf(stderr, "\n");
+                return 1;
+            }
+        }
+        
+        return 0;// st_idle_freq_modify();
+    }
+
+    if (apply)
+    {
+        STConfig config = ST_CONFIG_DEFAULTS;
+        
+        ret = st_get_config(&config, ST_CONFIG_DEFAULT_PATH);
+        if (ret)
+        {
+            fprintf(stderr, "Please create the configs using -m argument\n");
+            return 1;
+        }
+        return st_idle_freq_apply(&config);
     }
 
     // ALLOWED OUTPUT FORMATS

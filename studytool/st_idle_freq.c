@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <string.h>
 #include "st_output.h"
 #include "st_idle_freq.h"
 
 // https://docs.kernel.org/admin-guide/pm/cpuidle.html
 
+
+// get functions
 int read_string_addr(const char * addr, char * buffer, size_t buffer_len)
 {
     int fd = open(addr, O_RDONLY);
@@ -169,16 +172,156 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
             }
         }
     }
+    return 0;
+}
 
-    // calculate averages
-    
+// modify functions
+
+int st_set_default_config(char * config_path)
+{
+    int fd;
+    char buf[512] = {0};
+    STConfig config = ST_CONFIG_DEFAULTS;
+    PackageStats package = st_idle_freq_get_package();
+
+    fd = open(config_path, O_WRONLY | O_CREAT);
+    if (fd == -1) 
+    {
+        fprintf(stderr, "Can not open config file path\n");
+        return 1;
+    }
+
+    sprintf(buf, "%d #DMA_LATENCY_US\n", config.dma_latency_us);
+
+    // write dma
+    if (write(fd, buf, sizeof(buf)) == -1)
+    {
+        fprintf(stderr, "Unable to write to config file\n");
+        close(fd);
+        return 1;
+    }
+
+    // write goal c-states
+    for (int i = 0; i < package.available_idle_states; ++i )
+    {
+        char buf2[64] = {0};
+        buf[0] = '\0';
+        if (i == 0)
+        {
+            for (int i2 = 0; i2 < package.all_cpus; ++i2)
+            {
+                sprintf(buf2, "%d,", i2);
+                strcat(buf, buf2);
+            }
+            buf[strlen(buf) - 1] = ' ';
 
 
+        }
+        sprintf(buf2, " # C-state %d target for CPUS", i);
+        strcat(buf, buf2);
+        if (write(fd, buf, sizeof(buf)) == -1)
+        {
+            fprintf(stderr, "Unable to write to config file\n");
+            close(fd);
+            return 1;
+        }
+    }
 
+    close(fd);
     return 0;
 
 }
 
+int read_line(int fd, char * buf, ssize_t max_length)
+{
+    char c = '\0';
+    int length = 1;
+    while(true)
+    {
+        if (length == max_length)
+        {
+            return 1;
+        }
+        read(fd, &c, 1);
+        if(c == '\n' || c == EOF)
+        {
+            return 0;
+        }
+        strcat(buf, &c);
+        buf[length + 1] = '\0';
+        ++ length;
+
+    }
+    return 0;
+}
+
+int st_get_config(STConfig * config, char * config_path)
+{
+    int fd;
+    char read_buf[256] = {0};
+    PackageStats package = st_idle_freq_get_package();
+    memset(config, 0, sizeof(STConfig));
+
+    fd = open(config_path, O_RDONLY);
+    
+    if ( fd == -1 ) 
+    {
+        fprintf(stderr, "Can not open config file path\n");
+        return 1;
+    }
+
+
+    // Parse DMA latency
+
+    if (read_line(fd, read_buf, 256))
+    {
+        close(fd);
+        return 1;
+    }
+    if (sscanf(read_buf, "%i", &config->dma_latency_us) != 1)
+    {
+        close(fd);
+        return 1;
+    }
+
+    // Parse target C-states
+
+    for (long i = 0; i < package.available_idle_states; ++i)
+    {
+        if (read_line(fd, read_buf, 256))
+        {
+            close(fd);
+            return 1;
+        }
+
+        int offset = 0;
+        int val, n;
+        while (sscanf(&read_buf[offset], "%d%n", &val, &n) == 1) {
+            offset += n;
+            if (val < package.all_cpus)
+            {
+                config->core_target_c_state[val] = i;
+            }
+            else
+            {
+                close(fd);
+                return 1;
+            }
+
+            if (read_buf[offset] == ',')
+                ++offset;
+            if (read_buf[offset] == '#')
+                break;
+        }
+    }
+
+
+
+    close(fd);
+    return 0;
+}
+
+// apply functions
 typedef struct
 {
     int desired_cpu_latency_us;
@@ -195,7 +338,7 @@ void* set_dma_latency_thread(void* arg) {
     if (desired_cpu_latency_us < 0)
     {
         return NULL;
-    } 
+    }
 
     fd = open(PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR, O_WRONLY);
     if (fd == -1) 
@@ -222,21 +365,12 @@ void* set_dma_latency_thread(void* arg) {
     return NULL;
 }
 
-
-
-int st_idle_freq_modify()
+int st_idle_freq_apply(STConfig * config)
 {
 
     // start dma latency constraint
-    latencyThread latencyDMAThreadVals = {0, PTHREAD_MUTEX_INITIALIZER};
-    printf("Enter desired CPU DMA latency in us (example: 100):");
-    if (scanf("%d", &latencyDMAThreadVals.desired_cpu_latency_us) != 1)
-    {
-        fprintf(stderr, "Error reading input\n");
-        while(getchar() != '\n');
-        return 1;
-    }
-    pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint);
+    latencyThread latencyDMAThreadVals = {config->dma_latency_us, PTHREAD_MUTEX_INITIALIZER};
+    pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint); // thread stops when lock is unlocked
     pthread_t dma_latency_thread;
     pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
 
@@ -249,6 +383,9 @@ int st_idle_freq_modify()
         printf("Press Enter to exit...\n");
         wait = getchar();
     }
+
+
+    // stop latency constraint
     pthread_mutex_unlock(&latencyDMAThreadVals.stop_latency_constraint);
     pthread_join(dma_latency_thread, NULL);
 
