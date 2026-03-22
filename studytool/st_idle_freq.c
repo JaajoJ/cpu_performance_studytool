@@ -181,6 +181,7 @@ int st_set_default_config(char * config_path)
 {
     int fd;
     char buf[512] = {0};
+    char buf2[64] = {0};
     STConfig config = ST_CONFIG_DEFAULTS;
     PackageStats package = st_idle_freq_get_package();
 
@@ -191,7 +192,7 @@ int st_set_default_config(char * config_path)
         return 1;
     }
 
-    sprintf(buf, "%d #DMA_LATENCY_US\n", config.dma_latency_us);
+    sprintf(buf, "%d # DMA_LATENCY_US\n", config.dma_latency_us);
 
     // write dma
     if (write(fd, buf, sizeof(buf)) == -1)
@@ -204,7 +205,7 @@ int st_set_default_config(char * config_path)
     // write goal c-states
     for (int i = 0; i < package.available_idle_states; ++i )
     {
-        char buf2[64] = {0};
+        buf2[0] = '\0';
         buf[0] = '\0';
         if (i == 0)
         {
@@ -213,13 +214,13 @@ int st_set_default_config(char * config_path)
                 sprintf(buf2, "%d,", i2);
                 strcat(buf, buf2);
             }
-            buf[strlen(buf) - 1] = ' ';
-
-
         }
-        sprintf(buf2, " # C-state %d target for CPUS", i);
+
+        sprintf(buf2, " # C-state %i target for CPUS\n", i);
+
         strcat(buf, buf2);
-        if (write(fd, buf, sizeof(buf)) == -1)
+
+        if (write(fd, buf, strlen(buf)) == -1)
         {
             fprintf(stderr, "Unable to write to config file\n");
             close(fd);
