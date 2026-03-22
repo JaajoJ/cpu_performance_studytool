@@ -87,6 +87,6 @@ static int __init init_st(void)
 
 module_init(init_st);
 
-MODULE_LICENSE("GPLv3");
+MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jaakko-Juhani Lunden");
 MODULE_DESCRIPTION("Study module for idle governor ");

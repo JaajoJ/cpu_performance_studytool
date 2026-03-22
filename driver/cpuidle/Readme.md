@@ -72,3 +72,13 @@ struct cpuidle_state {
 			    struct cpuidle_driver *drv,
 			    int index);
 };
+
+
+
+# How to use
+
+sudo grep "cpuidle_register_governor" /proc/kallsyms
+
+// add 0x in the beginning 
+
+sudo insmod governor_dev.ko reg_gov_addr=0xffffffffac5fed40
