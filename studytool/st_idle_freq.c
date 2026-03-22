@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "st_output.h"
 #include "st_idle_freq.h"
 
@@ -86,6 +87,7 @@ int st_idle_freq(const int core, const char output_mode, const bool modify)
     return 0;
 
 }
+
 
 
 PackageStats st_idle_freq_get_package()
@@ -177,11 +179,57 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
 
 }
 
-int st_idle_freq_modify()
+typedef struct
 {
     int desired_cpu_latency_us;
+    pthread_mutex_t stop_latency_constraint;
+}  latencyThread; 
+
+void* set_dma_latency_thread(void* arg) {
+    latencyThread *threadVals =  (latencyThread *) arg;
+    int desired_cpu_latency_us = threadVals->desired_cpu_latency_us;
+    pthread_mutex_t *stop_thread = &threadVals->stop_latency_constraint;
     int fd;
 
+
+    if (desired_cpu_latency_us < 0)
+    {
+        return NULL;
+    } 
+
+    fd = open(PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR, O_WRONLY);
+    if (fd == -1) 
+    {
+        fprintf(stderr, "dma_thread: DMA latency unavailable\n");
+        return NULL;
+    }
+
+    printf("dma_thread: Setting the latency to %d\n", desired_cpu_latency_us);
+    if (write(fd, &desired_cpu_latency_us, sizeof(desired_cpu_latency_us)) == -1)
+    {
+        fprintf(stderr, "dma_thread: Unable to write DMA latency\n");
+        close(fd);
+        return NULL;
+    }
+
+    // Wait for close signal or pthread_join
+    sleep(2);
+    pthread_mutex_lock(stop_thread);
+    pthread_mutex_unlock(stop_thread);
+
+    close(fd);
+    printf("dma_thread: constraint released, fd closed\n");
+    return NULL;
+}
+
+
+
+int st_idle_freq_modify()
+{
+
+    // start dma latency constraint
+    latencyThread latencyDMAThreadVals = {0, PTHREAD_MUTEX_INITIALIZER};
+    int desired_cpu_latency_us = 0;
     printf("Enter desired CPU DMA latency in us (example: 100):");
     if (scanf("%d", &desired_cpu_latency_us) != 1)
     {
@@ -189,24 +237,12 @@ int st_idle_freq_modify()
         while(getchar() != '\n');
         return 1;
     }
+    pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint);
+    pthread_t dma_latency_thread;
+    pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
 
-    if (desired_cpu_latency_us < 0)
-    {
-        return 1;
-    } 
 
-    fd = open(PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR, O_WRONLY);
-    if (fd == -1) 
-    {
-        fprintf(stderr, "DMA latency unavailable\n");
-        return 1;
-    }
-    if (write(fd, &desired_cpu_latency_us, sizeof(desired_cpu_latency_us)) == -1)
-    {
-        close(fd);
-        return 1;
-    }
-
+    // Loop until stop
     int wait = getchar();
     wait = 0;
     while( wait != '\n')
@@ -214,8 +250,8 @@ int st_idle_freq_modify()
         printf("Press Enter to exit...\n");
         wait = getchar();
     }
-
-    close(fd);
+    pthread_mutex_unlock(&latencyDMAThreadVals.stop_latency_constraint);
+    pthread_join(dma_latency_thread, NULL);
 
     return 0;
 
