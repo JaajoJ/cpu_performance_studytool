@@ -229,9 +229,8 @@ int st_idle_freq_modify()
 
     // start dma latency constraint
     latencyThread latencyDMAThreadVals = {0, PTHREAD_MUTEX_INITIALIZER};
-    int desired_cpu_latency_us = 0;
     printf("Enter desired CPU DMA latency in us (example: 100):");
-    if (scanf("%d", &desired_cpu_latency_us) != 1)
+    if (scanf("%d", &latencyDMAThreadVals.desired_cpu_latency_us) != 1)
     {
         fprintf(stderr, "Error reading input\n");
         while(getchar() != '\n');
