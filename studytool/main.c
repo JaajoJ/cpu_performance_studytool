@@ -103,8 +103,8 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
-        
-        return 0;// st_idle_freq_modify();
+        st_idle_freq_modify(ST_CONFIG_DEFAULT_PATH);
+        return 0;
     }
 
     if (apply)
