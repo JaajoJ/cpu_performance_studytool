@@ -216,7 +216,7 @@ int st_set_default_config(char * config_path)
     sprintf(buf, "%d # DMA_LATENCY_US\n", config.dma_latency_us);
 
     // write dma
-    if (write(fd, buf, sizeof(buf)) == -1)
+    if (write(fd, buf, strlen(buf)) == -1)
     {
         fprintf(stderr, "Unable to write to config file\n");
         close(fd);
