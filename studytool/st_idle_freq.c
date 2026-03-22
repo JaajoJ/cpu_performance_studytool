@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
+#include <sys/wait.h>
 #include "st_output.h"
 #include "st_idle_freq.h"
 
@@ -177,6 +178,26 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
 
 // modify functions
 
+void st_idle_freq_modify(char *path)
+{
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("fork");
+        return;
+    }
+
+    if (pid == 0) {
+        /* child — replace with vi */
+        execlp("vi", "vi", path, NULL);
+        perror("execlp");   /* only reached if execlp fails */
+        _exit(1);
+    }
+
+    /* parent — wait for vi to exit */
+    waitpid(pid, NULL, 0);
+}
+
 int st_set_default_config(char * config_path)
 {
     int fd;
@@ -185,7 +206,7 @@ int st_set_default_config(char * config_path)
     STConfig config = ST_CONFIG_DEFAULTS;
     PackageStats package = st_idle_freq_get_package();
 
-    fd = open(config_path, O_WRONLY | O_CREAT);
+    fd = open(config_path, O_WRONLY | O_CREAT, 0644);
     if (fd == -1) 
     {
         fprintf(stderr, "Can not open config file path\n");

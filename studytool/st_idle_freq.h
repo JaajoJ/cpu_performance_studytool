@@ -43,6 +43,8 @@ int st_get_config(STConfig * config, char * config_path);
 
 int st_set_default_config(char * config_path);
 
+void st_idle_freq_modify(char *path);
+
 PackageStats st_idle_freq_get_package();
 
 int st_idle_freq_get_core_idle_delta(PackageStats * package_stats);
