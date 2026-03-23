@@ -410,7 +410,7 @@ int st_idle_freq_apply(STConfig * config)
 
 
     // Loop until stop
-    int wait = getchar();
+    int wait ; //  = getchar();
     wait = 0;
     while( wait != '\n')
     {
