@@ -232,8 +232,12 @@ int st_set_default_config(char * config_path)
         {
             for (int i2 = 0; i2 < package.all_cpus; ++i2)
             {
-                sprintf(buf2, "%d,", i2);
+                sprintf(buf2, "%d", i2);
                 strcat(buf, buf2);
+                if (i2 + 1 != package.all_cpus)
+                {
+                    strcat(buf, ",");
+                }
             }
         }
 
