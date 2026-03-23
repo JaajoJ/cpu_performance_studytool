@@ -377,6 +377,7 @@ void* set_dma_latency_thread(void* arg) {
     if (fd == -1) 
     {
         fprintf(stderr, "dma_thread: DMA latency unavailable\n");
+        fprintf(stderr, "dma_thread: Latency value %i us\n", desired_cpu_latency_us);
         return NULL;
     }
 
