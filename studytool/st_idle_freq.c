@@ -260,7 +260,8 @@ int st_set_default_config(char * config_path)
 
 int read_line(int fd, char * buf, ssize_t max_length)
 {
-    char c = '\0';
+    char c[2] = {0};
+    
     int length = 1;
     while(true)
     {
@@ -268,12 +269,12 @@ int read_line(int fd, char * buf, ssize_t max_length)
         {
             return 1;
         }
-        read(fd, &c, 1);
-        if(c == '\n' || c == EOF)
+        read(fd, c, 1);
+        if(c[0] == '\n' || c[0] == EOF)
         {
             return 0;
         }
-        strcat(buf, &c);
+        strcat(buf, c);
         buf[length + 1] = '\0';
         ++ length;
 
@@ -301,11 +302,13 @@ int st_get_config(STConfig * config, char * config_path)
 
     if (read_line(fd, read_buf, 256))
     {
+        fprintf(stderr, "Line length too big for DMA latency.\n");
         close(fd);
         return 1;
     }
     if (sscanf(read_buf, "%i", &config->dma_latency_us) != 1)
     {
+        fprintf(stderr, "Invalid format for DMA latency.\n");
         close(fd);
         return 1;
     }
@@ -314,8 +317,10 @@ int st_get_config(STConfig * config, char * config_path)
 
     for (long i = 0; i < package.available_idle_states; ++i)
     {
+        memset(read_buf, 0, sizeof(read_buf));
         if (read_line(fd, read_buf, 256))
         {
+            fprintf(stderr, "Line length too big for C-state %ld.\n", i);
             close(fd);
             return 1;
         }
@@ -327,9 +332,11 @@ int st_get_config(STConfig * config, char * config_path)
             if (val < package.all_cpus)
             {
                 config->core_target_c_state[val] = i;
+                printf("Configured CPU %i C-state target %ld.\n", val, i);
             }
             else
             {
+                fprintf(stderr, "Invalid CPU found: %i\n", val);
                 close(fd);
                 return 1;
             }
