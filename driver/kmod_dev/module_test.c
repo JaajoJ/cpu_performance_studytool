@@ -41,7 +41,9 @@ static struct miscdevice hello_dev = {
     .mode  = 0222,
 };
 
-static struct class *st_cpu_class = NULL;
+static struct device * st_core;
+
+static struct class *st_cpu_class;
 
 static int __init hello_init(void)
 {
@@ -56,7 +58,7 @@ static int __init hello_init(void)
 
     // Create device files
     st_cpu_class = class_create("misc_device"); // Class for /sys/class/misc_device/
-
+    st_core = device_create(st_cpu_class, NULL, 0, NULL, "core");
 
 
     // Register files
@@ -71,6 +73,7 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
+    device_destroy(st_cpu_class, 0);
     class_destroy(st_cpu_class);
     misc_deregister(&hello_dev);
     printk(KERN_INFO "hello: module unloaded\n");
