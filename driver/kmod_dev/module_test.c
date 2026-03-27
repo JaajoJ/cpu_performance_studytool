@@ -5,7 +5,6 @@
 #include <linux/uaccess.h>
 #include <linux/cpu.h>
 #include <linux/cpuidle.h>
-#include <linux/cdev.h> 
 #include "conf.h"
 
 
@@ -13,25 +12,22 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
 MODULE_DESCRIPTION("Reads a 32-bit integer from userspace and prints it");
 
-static ssize_t hello_write(struct file *file, const char __user *buf,
-                           size_t count, loff_t *ppos)
+static ssize_t value_store(struct device *dev,
+                            struct device_attribute *attr,
+                            const char *buf, size_t count)
 {
-    s32 value;
+    int value;
+    int ret = kstrtoint(buf, 10, &value);
+    if (ret)
+        return ret;
 
-    if (count < sizeof(s32))
-        return -EINVAL;
-
-    if (copy_from_user(&value, buf, sizeof(s32)))
-        return -EFAULT;
-
-    printk(KERN_INFO "hello: received s32 = %d (0x%08x)\n", value, value);
-
-    return sizeof(s32);
+    printk(KERN_INFO "hello: received %d\n", value);
+    return count;
 }
 
-static const struct file_operations hello_fops = {
-    .owner = THIS_MODULE,
-    .write = hello_write,
+static struct device_attribute c_state_attr = {
+    .attr  = { .name = "set_idle_state", .mode = 0222 },
+    .store = value_store,
 };
 
 static struct device * st_core;
@@ -54,13 +50,15 @@ static int __init hello_init(void)
     st_cpu_class = class_create("misc_device"); // Class for /sys/class/misc_device/
     //      Core
     st_core = device_create(st_cpu_class, NULL, 0, NULL, "core");
-
+    //          C-state
+    device_create_file(st_core, &c_state_attr);
     printk(KERN_INFO "hello: module loaded, device at /sys/class/misc_device/\n");
     return 0;
 }
 
 static void __exit hello_exit(void)
 {
+    device_remove_file(st_core, &c_state_attr);
     device_destroy(st_cpu_class, 0);
     class_destroy(st_cpu_class);
     printk(KERN_INFO "hello: module unloaded\n");
