@@ -402,12 +402,21 @@ void* set_dma_latency_thread(void* arg) {
 int st_idle_freq_apply(STConfig * config)
 {
 
-    // start dma latency constraint
-    latencyThread latencyDMAThreadVals = {config->dma_latency_us, PTHREAD_MUTEX_INITIALIZER};
-    pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint); // thread stops when lock is unlocked
+    // initialize values
+    latencyThread latencyDMAThreadVals = {config->dma_latency_us, PTHREAD_MUTEX_INITIALIZER};;
     pthread_t dma_latency_thread;
-    pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
 
+    // Check settings
+    bool enable_latency_constraint = 0;
+
+    if (config->dma_latency_us > -1)
+        enable_latency_constraint = 1;
+
+    if ( enable_latency_constraint )
+    { 
+        pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint); // thread stops when lock is unlocked
+        pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
+    }
 
     // Loop until stop
     int wait ; //  = getchar();
@@ -420,9 +429,11 @@ int st_idle_freq_apply(STConfig * config)
 
 
     // stop latency constraint
-    pthread_mutex_unlock(&latencyDMAThreadVals.stop_latency_constraint);
-    pthread_join(dma_latency_thread, NULL);
-
+    if (enable_latency_constraint)
+    {
+        pthread_mutex_unlock(&latencyDMAThreadVals.stop_latency_constraint);
+        pthread_join(dma_latency_thread, NULL);
+    }
     return 0;
 
 }
