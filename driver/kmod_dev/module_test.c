@@ -41,14 +41,23 @@ static struct miscdevice hello_dev = {
     .mode  = 0222,
 };
 
+static struct class *st_cpu_class = NULL;
+
 static int __init hello_init(void)
 {
+
+    // Get initial values of the running system
     int cpu_count = num_present_cpus();
     struct cpuidle_driver *drv = cpuidle_get_driver();
     int c_state_count = drv->state_count;
 
     printk("CPU COUNT %d\n", cpu_count);
     printk("C_state COUNT %d\n", c_state_count);
+
+    // Create device files
+    st_cpu_class = class_create("misc_device"); // Class for /sys/class/misc_device/
+
+
 
     // Register files
     int ret = misc_register(&hello_dev);
@@ -62,6 +71,7 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
+    class_destroy(st_cpu_class);
     misc_deregister(&hello_dev);
     printk(KERN_INFO "hello: module unloaded\n");
 }
