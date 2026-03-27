@@ -55,7 +55,7 @@ static int __init hello_init(void)
     //      Core
     st_core = device_create(st_cpu_class, NULL, 0, NULL, "core");
 
-    printk(KERN_INFO "hello: module loaded, device at /dev/hello\n");
+    printk(KERN_INFO "hello: module loaded, device at /sys/class/misc_device/\n");
     return 0;
 }
 
