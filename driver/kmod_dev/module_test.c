@@ -4,6 +4,10 @@
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
 #include <linux/uaccess.h>
+#include <linux/cpu.h>
+#include <linux/cpuidle.h>
+#include "conf.h"
+
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
@@ -39,6 +43,14 @@ static struct miscdevice hello_dev = {
 
 static int __init hello_init(void)
 {
+    int cpu_count = num_present_cpus();
+    struct cpuidle_driver *drv = cpuidle_get_driver();
+    int c_state_count = drv->state_count;
+
+    printk("CPU COUNT %d\n", cpu_count);
+    printk("C_state COUNT %d\n", c_state_count);
+
+    // Register files
     int ret = misc_register(&hello_dev);
     if (ret) {
         printk(KERN_ERR "hello: failed to register device: %d\n", ret);
