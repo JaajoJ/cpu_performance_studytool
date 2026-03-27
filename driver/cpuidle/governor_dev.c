@@ -7,6 +7,7 @@
 #include <linux/init.h>
 #include <linux/kallsyms.h>
 #include <linux/kprobes.h>
+#include "governor_dev.h"
 
 
 static unsigned long reg_gov_addr = 0;
@@ -88,5 +89,5 @@ static int __init init_st(void)
 module_init(init_st);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Jaakko-Juhani Lunden");
+MODULE_AUTHOR("You");
 MODULE_DESCRIPTION("Study module for idle governor ");
