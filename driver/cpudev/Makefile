@@ -6,6 +6,6 @@ all:
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
-	rm -f ../src/*.o.cmd
+	rm -f ../src/.st_lib.o.cmd
 	rm -f ../src/*.o
 	
