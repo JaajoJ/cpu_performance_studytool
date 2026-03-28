@@ -43,9 +43,10 @@ static int __init hello_init(void)
     // Get initial values of the running system
     cpu_count = num_present_cpus();
     struct cpuidle_driver *drv = cpuidle_get_driver();
-    if (!drv) 
+    if (!drv) {
         pr_err("hello: no cpuidle driver found\n");
-        
+        return -ENODEV;
+    }
     
     c_state_count = drv->state_count;
     
