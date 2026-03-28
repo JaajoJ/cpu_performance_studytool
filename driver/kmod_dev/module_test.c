@@ -5,6 +5,7 @@
 #include <linux/uaccess.h>
 #include <linux/cpu.h>
 #include <linux/cpuidle.h>
+#include "module_test.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
@@ -76,10 +77,9 @@ static void set_core_name(char * buf, int value)
     buf[offset] = '\0';
 
 }
-static int __init hello_init(void)
+int st_setup(void)
 {
-
-    // Get initial values of the running system
+        // Get initial values of the running system
     cpu_count = num_present_cpus();
     struct cpuidle_driver *drv = cpuidle_get_driver();
     if (!drv) {
@@ -124,9 +124,8 @@ static int __init hello_init(void)
     return 0;
 }
 
-static void __exit hello_exit(void)
+int st_destroy(void)
 {
-
     for (int i = 0; i < cpu_count; ++i)
     {
         device_remove_file(st_dev[i].dev, &c_state_attr);
@@ -135,6 +134,18 @@ static void __exit hello_exit(void)
     class_destroy(st_cpu_class);
     kfree(st_dev);
     printk(KERN_INFO "hello: module unloaded\n");
+    return 0;
+}
+
+static int __init hello_init(void)
+{
+    st_setup();
+    return 0;
+}
+
+static void __exit hello_exit(void)
+{
+    st_destroy();
 }
 
 module_init(hello_init);
