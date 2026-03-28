@@ -81,4 +81,4 @@ sudo grep "cpuidle_register_governor" /proc/kallsyms
 
 // add 0x in the beginning 
 
-sudo insmod governor_dev.ko reg_gov_addr=0xffffffffac5fed40
+sudo insmod st_module.ko reg_gov_addr=0xffffffffbb848240
