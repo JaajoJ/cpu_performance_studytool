@@ -1,5 +1,3 @@
-#include <linux/module.h>
-#include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
@@ -10,13 +8,6 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
 MODULE_DESCRIPTION("Module for developing the study tool");
-
-struct stDev {
-    struct device * dev;
-    char core_name[8];
-    int state;
-    int core;
-};
 
 
 static struct stDev * st_dev; // Device for /sys/class/st_cpu/core<X>
