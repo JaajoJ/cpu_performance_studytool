@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
-        st_idle_freq_modify(ST_CONFIG_DEFAULT_PATH);
+        st_modify(ST_CONFIG_DEFAULT_PATH);
         return 0;
     }
 
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Please create the configs using -m argument\n");
             return 1;
         }
-        return st_idle_freq_apply(&config);
+        return st_apply(&config);
     }
 
     // ALLOWED OUTPUT FORMATS
@@ -131,6 +131,6 @@ int main(int argc, char *argv[]) {
 
     // CURRENT MODE: idle, frequency
     
-    return st_idle_freq(core, output_mode, modify);
+    return st_collect(core, output_mode, modify);
     
 }
