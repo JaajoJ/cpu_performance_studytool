@@ -460,6 +460,7 @@ int st_apply(STConfig * config)
     // SETUP GOVERNOR
     if ( enable_governor )
     {
+        printf("Enabling governor\n");
         
     }
 
@@ -467,7 +468,7 @@ int st_apply(STConfig * config)
 
     if ( enable_c_sates )
     {
-        
+        printf("Enabling c-states\n");
     }
 
 
