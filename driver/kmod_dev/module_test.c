@@ -43,16 +43,25 @@ static int __init hello_init(void)
     // Get initial values of the running system
     cpu_count = num_present_cpus();
     struct cpuidle_driver *drv = cpuidle_get_driver();
+    if (!drv) 
+        pr_err("hello: no cpuidle driver found\n");
+        
+    
     c_state_count = drv->state_count;
     
     printk("CPU COUNT %d\n", cpu_count);
     printk("C_state COUNT %d\n", c_state_count);
 
     st_dev = kzalloc(cpu_count * sizeof(struct stDev), GFP_KERNEL); 
+    if (!st_dev) 
+        pr_err("hello: Failed kzalloc\n");
 
     // Create device files
     st_cpu_class = class_create("st_cpu"); // Class for /sys/class/misc_device/
-
+    if (IS_ERR(st_cpu_class)) {
+        kfree(st_dev);
+        return PTR_ERR(st_cpu_class);
+    }
     for (int i = 0; i < cpu_count; ++i)
     {
         //      Core
