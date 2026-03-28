@@ -78,6 +78,7 @@ int get_available_c_states()
 int st_collect(const int core, const char output_mode, const bool modify)
 {
     PackageStats package = st_get_package();
+    st_get_core_idle_delta(&package);
 
     if ( output_mode == 'h' )
     {
@@ -103,7 +104,6 @@ PackageStats st_get_package()
     package.online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
     package.all_cpus = sysconf(_SC_NPROCESSORS_CONF);
     package.available_idle_states = get_available_c_states();
-    st_get_core_idle_delta(&package);
 
     //printf("this %ld\n", package.all_cpus);
     for ( int core_id = 0; core_id < package.all_cpus; ++core_id )
@@ -399,6 +399,39 @@ void* set_dma_latency_thread(void* arg) {
     return NULL;
 }
 
+int set_c_state()
+{
+
+    return 0;
+}
+
+bool is_module_loaded(const char *module_name)
+{
+    FILE *f = fopen("/proc/modules", "r");
+    if (!f) {
+        perror("fopen /proc/modules");
+        return false;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        char name[64];
+        sscanf(line, "%63s", name);
+        if (strcmp(name, module_name) == 0) {
+            fclose(f);
+            return true;
+        }
+    }
+
+    fclose(f);
+    return false;
+}
+
+int st_check_kmod()
+{
+    return is_module_loaded("st_module");
+}
+
 int st_apply(STConfig * config)
 {
 
@@ -408,15 +441,35 @@ int st_apply(STConfig * config)
 
     // Check settings
     bool enable_latency_constraint = 0;
-
+    bool enable_governor = 0;
+    bool enable_c_sates = 0;
+    
     if (config->dma_latency_us > -1)
         enable_latency_constraint = 1;
+    if (st_check_kmod())
+        enable_c_sates = 1;
 
+    // DMA
     if ( enable_latency_constraint )
     { 
         pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint); // thread stops when lock is unlocked
         pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
     }
+
+
+    // SETUP GOVERNOR
+    if ( enable_governor )
+    {
+        
+    }
+
+    // Setup C-States
+
+    if ( enable_c_sates )
+    {
+        
+    }
+
 
     // Loop until stop
     int wait ; //  = getchar();

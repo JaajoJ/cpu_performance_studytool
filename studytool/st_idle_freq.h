@@ -7,7 +7,7 @@
 
 // CONFIGS
 #define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
-#define ST_CONFIG_DEFAULTS {200,{0}}
+#define ST_CONFIG_DEFAULTS {200,{0},st_get_package()}
 
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
@@ -36,6 +36,7 @@ typedef struct
 {
     int dma_latency_us;
     int core_target_c_state[MAXIMUM_CORES];
+    PackageStats package;
 } STConfig;
 
 
