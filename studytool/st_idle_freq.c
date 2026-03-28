@@ -414,7 +414,7 @@ int st_set_c_state(int core, int state)
         return -1;
     }
     char int_string[32];
-    snprintf(int_string, sizeof(int_string), "%d", 42);
+    snprintf(int_string, sizeof(int_string), "%d", state);
 
     if (write(fd, int_string, strlen(int_string)) == -1)
     {
