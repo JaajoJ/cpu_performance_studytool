@@ -399,7 +399,7 @@ void* set_dma_latency_thread(void* arg) {
     return NULL;
 }
 
-int set_c_state()
+int set_c_state(int core, int state)
 {
 
     return 0;
@@ -434,6 +434,7 @@ int st_check_kmod()
 
 int st_apply(STConfig * config)
 {
+    int ret = 0;
 
     // initialize values
     latencyThread latencyDMAThreadVals = {config->dma_latency_us, PTHREAD_MUTEX_INITIALIZER};;
@@ -469,6 +470,15 @@ int st_apply(STConfig * config)
     if ( enable_c_sates )
     {
         printf("Enabling c-states\n");
+        
+        for (int i = 0; i < config->package.all_cpus; ++i)
+        {
+            ret = set_c_state(i, config->core_target_c_state[i]);
+            if ( ret )
+            {
+                fprintf(stderr, "Failed to set C-state for cpu %i state %i", i, config->core_target_c_state[i]);
+            }
+        }
     }
 
 
