@@ -1,6 +1,6 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
-#include "module_test.h"
+#include "st_lib.h"
 
 static int __init hello_init(void)
 {

@@ -5,7 +5,7 @@
 #include <linux/uaccess.h>
 #include <linux/cpu.h>
 #include <linux/cpuidle.h>
-#include "module_test.h"
+#include "st_lib.h"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
