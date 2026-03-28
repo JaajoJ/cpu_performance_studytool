@@ -43,14 +43,14 @@ int st_get_config(STConfig * config, char * config_path);
 
 int st_set_default_config(char * config_path);
 
-void st_idle_freq_modify(char *path);
+void st_modify(char *path);
 
-PackageStats st_idle_freq_get_package();
+PackageStats st_get_package();
 
-int st_idle_freq_get_core_idle_delta(PackageStats * package_stats);
+int st_get_core_idle_delta(PackageStats * package_stats);
 
-int st_idle_freq(const int core, const char output_mode, const bool modify);
+int st_collect(const int core, const char output_mode, const bool modify);
 
-int st_idle_freq_apply(STConfig * config);
+int st_apply(STConfig * config);
 
 #endif

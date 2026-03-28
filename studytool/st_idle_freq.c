@@ -75,9 +75,9 @@ int get_available_c_states()
     return count;
 }
 
-int st_idle_freq(const int core, const char output_mode, const bool modify)
+int st_collect(const int core, const char output_mode, const bool modify)
 {
-    PackageStats package = st_idle_freq_get_package();
+    PackageStats package = st_get_package();
 
     if ( output_mode == 'h' )
     {
@@ -94,7 +94,7 @@ int st_idle_freq(const int core, const char output_mode, const bool modify)
 
 
 
-PackageStats st_idle_freq_get_package()
+PackageStats st_get_package()
 {
     PackageStats package = {0};
     char addr_buf[128] = "";
@@ -103,7 +103,7 @@ PackageStats st_idle_freq_get_package()
     package.online_cpus = sysconf(_SC_NPROCESSORS_ONLN);
     package.all_cpus = sysconf(_SC_NPROCESSORS_CONF);
     package.available_idle_states = get_available_c_states();
-    st_idle_freq_get_core_idle_delta(&package);
+    st_get_core_idle_delta(&package);
 
     //printf("this %ld\n", package.all_cpus);
     for ( int core_id = 0; core_id < package.all_cpus; ++core_id )
@@ -131,7 +131,7 @@ int get_core_idle(long * c_state_idle, const int core_number, const int availabl
 
 }
 
-int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
+int st_get_core_idle_delta(PackageStats * package_stats)
 {
     long c_states_time[MAXIMUM_CORES][MAXIMUM_C_STATES] = {0};
     long c_states_time_delta[MAXIMUM_C_STATES] = {0};
@@ -178,7 +178,7 @@ int st_idle_freq_get_core_idle_delta(PackageStats * package_stats)
 
 // modify functions
 
-void st_idle_freq_modify(char *path)
+void st_modify(char *path)
 {
     pid_t pid = fork();
 
@@ -204,7 +204,7 @@ int st_set_default_config(char * config_path)
     char buf[512] = {0};
     char buf2[64] = {0};
     STConfig config = ST_CONFIG_DEFAULTS;
-    PackageStats package = st_idle_freq_get_package();
+    PackageStats package = st_get_package();
 
     fd = open(config_path, O_WRONLY | O_CREAT, 0644);
     if (fd == -1) 
@@ -286,7 +286,7 @@ int st_get_config(STConfig * config, char * config_path)
 {
     int fd;
     char read_buf[256] = {0};
-    PackageStats package = st_idle_freq_get_package();
+    PackageStats package = st_get_package();
     memset(config, 0, sizeof(STConfig));
 
     fd = open(config_path, O_RDONLY);
@@ -399,7 +399,7 @@ void* set_dma_latency_thread(void* arg) {
     return NULL;
 }
 
-int st_idle_freq_apply(STConfig * config)
+int st_apply(STConfig * config)
 {
 
     // initialize values
