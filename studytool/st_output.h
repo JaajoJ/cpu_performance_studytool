@@ -4,7 +4,7 @@
 #define ST_SUPPORTED_OUTPUT "hj"
 
 
-void st_output_arguments(const int core, const char output_mode, const bool modify);
+void st_output_arguments(const int core, const char output_mode);
 
 void st_print_package_stats(const PackageStats *pkg);
 

@@ -76,14 +76,14 @@ int get_available_c_states()
     return count;
 }
 
-int st_collect(const int core, const char output_mode, const bool modify)
+int st_collect(const int core, const char output_mode)
 {
     PackageStats package = st_get_package();
     st_get_core_idle_delta(&package);
 
     if ( output_mode == 'h' )
     {
-        st_output_arguments(core, output_mode, modify);
+        st_output_arguments(core, output_mode);
         st_print_package_stats(&package);
     }
     else if (output_mode == 'j')
@@ -287,7 +287,7 @@ int st_get_config(STConfig * config, char * config_path)
 {
     int fd;
     char read_buf[256] = {0};
-    PackageStats package = st_get_package();
+    PackageStats package = config->package;
     memset(config, 0, sizeof(STConfig));
 
     fd = open(config_path, O_RDONLY);
@@ -491,7 +491,7 @@ int st_apply(STConfig * config)
 
     if ( enable_c_sates )
     {
-        printf("Enabling c-states\n");
+        printf("Enabling c-states %li\n", config->package.all_cpus);
         
         for (int i = 0; i < config->package.all_cpus; ++i)
         {

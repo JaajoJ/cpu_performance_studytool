@@ -53,7 +53,7 @@ PackageStats st_get_package();
 
 int st_get_core_idle_delta(PackageStats * package_stats);
 
-int st_collect(const int core, const char output_mode, const bool modify);
+int st_collect(const int core, const char output_mode);
 
 int st_apply(STConfig * config);
 

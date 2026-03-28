@@ -131,6 +131,6 @@ int main(int argc, char *argv[]) {
 
     // CURRENT MODE: idle, frequency
     
-    return st_collect(core, output_mode, modify);
+    return st_collect(core, output_mode);
     
 }

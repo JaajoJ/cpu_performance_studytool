@@ -2,9 +2,9 @@
 #include <stdbool.h>
 #include "st_output.h"
 
-void st_output_arguments(const int core, const char output_mode, const bool modify)
+void st_output_arguments(const int core, const char output_mode)
 {
-    printf("    core: %i\n    output_mode: %c\n    modify: %i\n", core, output_mode, modify);
+    printf("    core: %i\n    output_mode: %c\n", core, output_mode);
 }
 #include <stdio.h>
 
