@@ -16,6 +16,10 @@ MODULE_PARM_DESC(reg_gov_addr, "Address of cpuidle_register_governor");
 
 typedef int (*reg_gov_fn)(struct cpuidle_governor *);
 
+static struct stDev * st_dev; // Device for /sys/class/st_cpu/core<X>
+
+static struct class *st_cpu_class;
+
 /*
 The role of this callback is to prepare the governor for handling the (logical) CPU represented by the struct cpuidle_device object pointed to by the dev argument. 
 The struct cpuidle_driver object pointed to by the drv argument represents the CPUIdle driver to be used with that CPU (among other things, 
@@ -83,7 +87,7 @@ static int __init init_st(void)
     }
 
     real_register = (reg_gov_fn) reg_gov_addr;
-	st_setup();
+	st_setup(st_cpu_class, st_dev);
     return real_register(&st_gov);
 }
 
