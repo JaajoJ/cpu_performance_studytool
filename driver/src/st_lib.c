@@ -9,11 +9,6 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
 MODULE_DESCRIPTION("Module for developing the study tool");
 
-
-static struct stDev * st_dev; // Device for /sys/class/st_cpu/core<X>
-
-static struct class *st_cpu_class; // Class for /sys/class/st_cpu/
-
 static int cpu_count;
 static int c_state_count;
 
@@ -68,7 +63,7 @@ static void set_core_name(char * buf, int value)
     buf[offset] = '\0';
 
 }
-int st_setup(void)
+int st_setup(struct class * st_cpu_class, struct stDev * st_dev)
 {
         // Get initial values of the running system
     cpu_count = num_present_cpus();
@@ -115,7 +110,7 @@ int st_setup(void)
     return 0;
 }
 
-int st_destroy(void)
+int st_destroy(struct class * st_cpu_class, struct stDev * st_dev)
 {
     for (int i = 0; i < cpu_count; ++i)
     {
