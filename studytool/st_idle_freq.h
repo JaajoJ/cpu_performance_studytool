@@ -18,6 +18,9 @@
 
 #define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
 
+// st_module bindings
+#define ST_MODULE_C_STATE_ADDR "/sys/class/st_cpu/core%i/set_idle_state"
+
 typedef struct  
 {
     int idle_time[MAXIMUM_C_STATES]; // [0] == POLL: /sys/devices/system/cpu/cpuX/cpuidle/state*/time

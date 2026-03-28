@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/syscall.h>
 #include "st_output.h"
 #include "st_idle_freq.h"
 
@@ -401,7 +402,27 @@ void* set_dma_latency_thread(void* arg) {
 
 int set_c_state(int core, int state)
 {
+    int fd;
+    char module_path[64] = {0};
 
+    snprintf(module_path, sizeof(module_path), ST_MODULE_C_STATE_ADDR, core);
+    fd = open(module_path, O_WRONLY);
+    if (fd == -1) 
+    {
+        fprintf(stderr, "Unable to write core %i to state %i \n", core, state);
+        return -1;
+    }
+    char int_string[32];
+    snprintf(int_string, sizeof(int_string), "%d", 42);
+
+    if (write(fd, int_string, strlen(int_string)) == -1)
+    {
+        fprintf(stderr, "Unable to write core %i to state %i \n", core, state);
+        close(fd);
+        return -1;
+    }
+
+    close(fd);
     return 0;
 }
 
@@ -412,17 +433,17 @@ bool is_module_loaded(const char *module_name)
         perror("fopen /proc/modules");
         return false;
     }
-
     char line[256];
-    while (fgets(line, sizeof(line), f)) {
+    while (fgets(line, sizeof(line), f)) 
+    {
         char name[64];
         sscanf(line, "%63s", name);
-        if (strcmp(name, module_name) == 0) {
+        if (strcmp(name, module_name) == 0) 
+        {
             fclose(f);
             return true;
         }
     }
-
     fclose(f);
     return false;
 }
