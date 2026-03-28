@@ -205,7 +205,7 @@ int st_set_default_config(char * config_path)
     char buf[512] = {0};
     char buf2[64] = {0};
     STConfig config = ST_CONFIG_DEFAULTS;
-    PackageStats package = st_get_package();
+    PackageStats package = config.package;
 
     fd = open(config_path, O_WRONLY | O_CREAT, 0644);
     if (fd == -1) 
@@ -287,8 +287,9 @@ int st_get_config(STConfig * config, char * config_path)
 {
     int fd;
     char read_buf[256] = {0};
-    PackageStats package = config->package;
+    
     memset(config, 0, sizeof(STConfig));
+    config->package = st_get_package();
 
     fd = open(config_path, O_RDONLY);
     
@@ -316,7 +317,7 @@ int st_get_config(STConfig * config, char * config_path)
 
     // Parse target C-states
 
-    for (long i = 0; i < package.available_idle_states; ++i)
+    for (long i = 0; i < config->package.available_idle_states; ++i)
     {
         memset(read_buf, 0, sizeof(read_buf));
         if (read_line(fd, read_buf, 256))
@@ -330,7 +331,7 @@ int st_get_config(STConfig * config, char * config_path)
         int val, n;
         while (sscanf(&read_buf[offset], "%d%n", &val, &n) == 1) {
             offset += n;
-            if (val < package.all_cpus)
+            if (val < config->package.all_cpus)
             {
                 config->core_target_c_state[val] = i;
                 printf("Configured CPU %i C-state target %ld.\n", val, i);

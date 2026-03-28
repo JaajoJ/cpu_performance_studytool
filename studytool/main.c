@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 
     if (apply)
     {
-        STConfig config = ST_CONFIG_DEFAULTS;
+        STConfig config;
         
         ret = st_get_config(&config, ST_CONFIG_DEFAULT_PATH);
         if (ret)
