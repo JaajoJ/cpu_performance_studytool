@@ -11,8 +11,8 @@ struct stDev {
     int core;
 };
 
-int st_setup(struct class * st_cpu_class, struct stDev * st_dev);
+int st_setup(struct class ** st_cpu_class, struct stDev ** st_dev);
 
-int st_destroy(struct class * st_cpu_class, struct stDev * st_dev);
+int st_destroy(struct class ** st_cpu_class, struct stDev ** st_dev);
 
 #endif

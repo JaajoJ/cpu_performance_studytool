@@ -63,7 +63,7 @@ static void set_core_name(char * buf, int value)
     buf[offset] = '\0';
 
 }
-int st_setup(struct class * st_cpu_class, struct stDev * st_dev)
+int st_setup(struct class ** st_cpu_class, struct stDev ** st_dev)
 {
         // Get initial values of the running system
     cpu_count = num_present_cpus();
@@ -78,47 +78,49 @@ int st_setup(struct class * st_cpu_class, struct stDev * st_dev)
     printk("CPU COUNT %d\n", cpu_count);
     printk("C_state COUNT %d\n", c_state_count);
 
-    st_dev = kzalloc(cpu_count * sizeof(struct stDev), GFP_KERNEL); 
-    if (!st_dev) 
+    *st_dev = kzalloc(cpu_count * sizeof(struct stDev), GFP_KERNEL); 
+    if (!*st_dev) 
         pr_err("hello: Failed kzalloc\n");
 
     // Create device files
-    st_cpu_class = class_create("st_cpu"); // Class for /sys/class/misc_device/
+    *st_cpu_class = class_create("st_cpu"); // Class for /sys/class/misc_device/
     if (IS_ERR(st_cpu_class)) {
-        kfree(st_dev);
-        return PTR_ERR(st_cpu_class);
+        kfree(*st_dev);
+        return PTR_ERR(*st_cpu_class);
     }
     for (int i = 0; i < cpu_count; ++i)
     {
         //      Core
-        set_core_name(st_dev[i].core_name, i);
-        st_dev[i].dev = device_create(
-            st_cpu_class, 
+        set_core_name((*st_dev)[i].core_name, i);
+        (*st_dev)[i].dev = device_create(
+            (*st_cpu_class), 
             NULL, 
             0, 
             NULL, 
-            st_dev[i].core_name
+            (*st_dev)[i].core_name
         );
-        st_dev[i].core = i;
+        (*st_dev)[i].core = i;
 
-        dev_set_drvdata(st_dev[i].dev, &st_dev[i]);
+        dev_set_drvdata((*st_dev)[i].dev, &(*st_dev)[i]);
 
         //      C-state
-        device_create_file(st_dev[i].dev, &c_state_attr);
+        device_create_file((*st_dev)[i].dev, &c_state_attr);
     }
     printk(KERN_INFO "hello: /sys/class/st_cpu/core<X>/set_idle_state\n");
     return 0;
 }
 
-int st_destroy(struct class * st_cpu_class, struct stDev * st_dev)
+int st_destroy(struct class ** st_cpu_class, struct stDev ** st_dev)
 {
     for (int i = 0; i < cpu_count; ++i)
     {
-        device_remove_file(st_dev[i].dev, &c_state_attr);
-        device_destroy(st_cpu_class, st_dev[i].dev->devt);
+        device_remove_file((*st_dev)[i].dev, &c_state_attr);
+        device_destroy(*st_cpu_class, (*st_dev)[i].dev->devt);
     }
-    class_destroy(st_cpu_class);
-    kfree(st_dev);
+    class_destroy(*st_cpu_class);
+    kfree(*st_dev);
+    *st_dev = NULL;
+    *st_cpu_class = NULL;
     printk(KERN_INFO "hello: module unloaded\n");
     return 0;
 }
