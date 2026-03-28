@@ -7,7 +7,7 @@
 #include <linux/init.h>
 #include <linux/kallsyms.h>
 #include <linux/kprobes.h>
-#include "governor_dev.h"
+#include "../src/st_lib.h"
 
 
 static unsigned long reg_gov_addr = 0;
@@ -83,6 +83,7 @@ static int __init init_st(void)
     }
 
     real_register = (reg_gov_fn) reg_gov_addr;
+	st_setup();
     return real_register(&st_gov);
 }
 
