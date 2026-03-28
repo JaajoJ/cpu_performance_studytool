@@ -57,4 +57,6 @@ int st_collect(const int core, const char output_mode, const bool modify);
 
 int st_apply(STConfig * config);
 
+int st_set_c_state(int core, int state);
+
 #endif

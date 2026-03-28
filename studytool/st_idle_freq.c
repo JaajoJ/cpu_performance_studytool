@@ -400,7 +400,7 @@ void* set_dma_latency_thread(void* arg) {
     return NULL;
 }
 
-int set_c_state(int core, int state)
+int st_set_c_state(int core, int state)
 {
     int fd;
     char module_path[64] = {0};
@@ -429,7 +429,8 @@ int set_c_state(int core, int state)
 bool is_module_loaded(const char *module_name)
 {
     FILE *f = fopen("/proc/modules", "r");
-    if (!f) {
+    if (!f) 
+    {
         perror("fopen /proc/modules");
         return false;
     }
@@ -494,7 +495,7 @@ int st_apply(STConfig * config)
         
         for (int i = 0; i < config->package.all_cpus; ++i)
         {
-            ret = set_c_state(i, config->core_target_c_state[i]);
+            ret = st_set_c_state(i, config->core_target_c_state[i]);
             if ( ret )
             {
                 fprintf(stderr, "Failed to set C-state for cpu %i state %i", i, config->core_target_c_state[i]);
