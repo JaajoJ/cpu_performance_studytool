@@ -1,5 +1,5 @@
-obj-m += st_dev_mod.o
-st_dev_mod-objs := main.o ../src/st_lib.o
+obj-m += st_module.o
+st_module-objs := main.o ../src/st_lib.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
