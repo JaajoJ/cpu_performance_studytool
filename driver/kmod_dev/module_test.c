@@ -10,10 +10,20 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
 MODULE_DESCRIPTION("Reads a 32-bit integer from userspace and prints it");
 
+struct stDev {
+    struct device * dev;
+    char core_name[8];
+    int state;
+    int core;
+};
+
 
 static struct stDev * st_dev; // Device for /sys/class/st_cpu/core<X>
 
 static struct class *st_cpu_class; // Class for /sys/class/st_cpu/
+
+static int cpu_count;
+static int c_state_count;
 
 static ssize_t value_store(struct device *dev,
                             struct device_attribute *attr,
@@ -21,15 +31,19 @@ static ssize_t value_store(struct device *dev,
 {
     int value;
     int ret = kstrtoint(buf, 10, &value);
+    struct stDev *core = dev_get_drvdata(dev);
+
     if (ret)
         return ret;
 
     printk(KERN_INFO "hello: received %d\n", value);
+
+    core->state = value % c_state_count;
+    printk(KERN_INFO "hello: set new value to core %d value %d\n", core->core, core->state);
+    
     return count;
 }
 
-static int cpu_count;
-static int c_state_count;
 
 static struct device_attribute c_state_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
     .attr  = { .name = "set_idle_state", .mode = 0222 },
@@ -62,13 +76,6 @@ static void set_core_name(char * buf, int value)
     buf[offset] = '\0';
 
 }
-
-struct stDev {
-    struct device * dev;
-    char core_name[8];
-    int state;
-};
-
 static int __init hello_init(void)
 {
 
@@ -106,6 +113,9 @@ static int __init hello_init(void)
             NULL, 
             st_dev[i].core_name
         );
+        st_dev[i].core = i;
+
+        dev_set_drvdata(st_dev[i].dev, &st_dev[i]);
 
         //      C-state
         device_create_file(st_dev[i].dev, &c_state_attr);
