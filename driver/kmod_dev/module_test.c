@@ -5,14 +5,13 @@
 #include <linux/uaccess.h>
 #include <linux/cpu.h>
 #include <linux/cpuidle.h>
-#include "conf.h"
-
-
+#include "st_lib.h"
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
 MODULE_DESCRIPTION("Reads a 32-bit integer from userspace and prints it");
 
-static stDev * st_dev; // Device for /sys/class/st_cpu/core<X>
+
+static struct stDev * st_dev; // Device for /sys/class/st_cpu/core<X>
 
 static struct class *st_cpu_class; // Class for /sys/class/st_cpu/
 
@@ -37,32 +36,6 @@ static struct device_attribute c_state_attr = {     // Device file for /sys/clas
     .store = value_store,
 };
 
-void set_core_name(char * buf, int value)
-{
-    buf[0] = 'c';
-    buf[1] = 'o';
-    buf[2] = 'r';
-    buf[3] = 'e';
-    int offset = 4;
-    if(value > 99)
-    {
-        buf[offset] = value / 100 + '0';
-        value = value % 100;
-        ++offset;
-    }
-    if(value > 9)
-    {
-        buf[offset] = value / 10 + '0';
-        value = value % 10;
-        ++offset;
-    }
-
-    buf[offset] = value + '0';
-    ++offset;
-
-    buf[offset] = '\0';
-
-}
 
 static int __init hello_init(void)
 {
@@ -75,7 +48,7 @@ static int __init hello_init(void)
     printk("CPU COUNT %d\n", cpu_count);
     printk("C_state COUNT %d\n", c_state_count);
 
-    st_dev = kzalloc(cpu_count * sizeof(stdev), GFP_KERNEL); 
+    st_dev = kzalloc(cpu_count * sizeof(struct stDev), GFP_KERNEL); 
 
     // Create device files
     st_cpu_class = class_create("st_cpu"); // Class for /sys/class/misc_device/
@@ -87,7 +60,7 @@ static int __init hello_init(void)
         st_dev[i].dev = device_create(
             st_cpu_class, 
             NULL, 
-            MKDEV(MAJOR(dev), i), 
+            0, 
             NULL, 
             st_dev[i].core_name
         );
@@ -102,10 +75,10 @@ static int __init hello_init(void)
 static void __exit hello_exit(void)
 {
 
-    //device_remove_file(st_core, &c_state_attr);
     for (int i = 0; i < cpu_count; ++i)
     {
-        device_destroy(st_cpu_class, st_dev[i].dev_num);
+        device_remove_file(st_dev[i].dev, &c_state_attr);
+        device_destroy(st_cpu_class, st_dev[i].dev->devt);
     }
     class_destroy(st_cpu_class);
     kfree(st_dev);
