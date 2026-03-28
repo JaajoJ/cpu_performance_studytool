@@ -9,7 +9,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("You");
-MODULE_DESCRIPTION("Reads a 32-bit integer from userspace and prints it");
+MODULE_DESCRIPTION("Module for developing the study tool");
 
 struct stDev {
     struct device * dev;
@@ -136,17 +136,3 @@ int st_destroy(void)
     printk(KERN_INFO "hello: module unloaded\n");
     return 0;
 }
-
-static int __init hello_init(void)
-{
-    st_setup();
-    return 0;
-}
-
-static void __exit hello_exit(void)
-{
-    st_destroy();
-}
-
-module_init(hello_init);
-module_exit(hello_exit);
