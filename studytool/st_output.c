@@ -1,18 +1,25 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "st_output.h"
 
 void st_output_arguments(const int core, const char output_mode)
 {
     printf("    core: %i\n    output_mode: %c\n", core, output_mode);
 }
-#include <stdio.h>
 
 void st_print_package_stats(const PackageStats *pkg)
 {
     printf("==== CPU Package Stats ====\n");
 
     printf("Current governor   : %s\n", pkg->current_governor);
+    printf("Available governors:\n");
+    const char * p = pkg->available_governors;
+    for (size_t i = 0; i < (size_t)pkg->available_governor_count; ++i)
+    {
+        printf("    %zu) %s\n", i, p);
+        p += strlen(p) + 1;   
+    }
     printf("Online CPUs        : %ld\n", pkg->online_cpus);
     printf("Total CPUs         : %ld\n", pkg->all_cpus);
     printf("Available C-states : %i\n", pkg->available_idle_states);
