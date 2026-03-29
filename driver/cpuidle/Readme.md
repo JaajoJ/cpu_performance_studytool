@@ -82,3 +82,7 @@ sudo grep "cpuidle_register_governor" /proc/kallsyms
 // add 0x in the beginning 
 
 sudo insmod st_module.ko reg_gov_addr=0xffffffffbb848240
+
+To measure latency at the same time:
+
+sudo cyclictest --mlockall --smp --priority=80 --interval=200 --distance=0
