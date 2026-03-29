@@ -14,6 +14,7 @@
 #define CORE_LATENCY_ADDR "/sys/devices/system/cpu/cpu%i/power/pm_qos_resume_latency_us"
 
 #define PACKAGE_CURRENT_GOVERNOR_ADDR "/sys/devices/system/cpu/cpuidle/current_governor_ro"
+#define PACKAGE_CURRENT_GOVERNOR_W_ADDR "/sys/devices/system/cpu/cpuidle/current_governor"
 #define PACKAGE_AVAILABLE_GOVERNORS_ADDR "/sys/devices/system/cpu/cpuidle/available_governors"
 #define PACKAGE_ONLINE_CPU_ADDR "/sys/devices/system/cpu/online"
 
