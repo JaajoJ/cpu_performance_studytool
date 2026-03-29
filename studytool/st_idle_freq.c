@@ -114,6 +114,7 @@ PackageStats st_get_package()
     }
 
     // Governor information
+    // CURRENT
     read_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, package.current_governor, sizeof(package.current_governor));
     for (size_t i = 0; i < strlen(package.current_governor); ++i) 
     {
@@ -122,11 +123,12 @@ PackageStats st_get_package()
             package.current_governor[i] = '\0';
         }
     }
-
+    // AVAILABLE
     read_string_addr(PACKAGE_AVAILABLE_GOVERNORS_ADDR, package.available_governors, sizeof(package.available_governors));
-    for (size_t i = 0; i < strlen(package.available_governors); ++i) // convert to multi-string / string table format
+    size_t s_len = strlen(package.available_governors);
+    for (size_t i = 0; i < s_len; ++i) // convert to multi-string / string table format
     {
-        if(package.available_governors[i] == '\n')
+        if(package.available_governors[i] == ' ')
         {
             package.available_governors[i] = '\0';
             ++ package.available_governor_count;
