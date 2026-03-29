@@ -538,14 +538,6 @@ int st_apply(STConfig * config)
         pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
     }
 
-
-    // SETUP GOVERNOR
-    if ( enable_governor )
-    {
-        printf("Enabling governor\n");
-        write_string_addr(PACKAGE_CURRENT_GOVERNOR_W_ADDR, ST_MODULE_GOVERNOR_NAME);   
-    }
-
     // Setup C-States
 
     if ( enable_c_sates )
@@ -561,6 +553,14 @@ int st_apply(STConfig * config)
             }
         }
     }
+
+      // SETUP GOVERNOR
+    if ( enable_governor )
+    {
+        printf("Enabling governor\n");
+        write_string_addr(PACKAGE_CURRENT_GOVERNOR_W_ADDR, ST_MODULE_GOVERNOR_NAME);   
+    }
+
 
 
     // Loop until stop
