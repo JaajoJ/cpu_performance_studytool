@@ -590,7 +590,7 @@ int st_apply(STConfig * config)
     if ( enable_governor )
     {
         printf("Disabling governor\n");
-        write_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, config->package.current_governor);   
+        write_string_addr(PACKAGE_CURRENT_GOVERNOR_W_ADDR, config->package.current_governor);   
     }
     return 0;
 
