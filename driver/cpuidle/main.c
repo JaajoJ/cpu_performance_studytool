@@ -1,6 +1,9 @@
 // https://docs.kernel.org/driver-api/pm/cpuidle.html
 // https://docs.kernel.org/admin-guide/pm/cpuidle.html
 // https://docs.kernel.org/trace/kprobes.html
+
+// https://github.com/torvalds/linux/blob/master/include/linux/cpuidle.h
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/cpuidle.h>
@@ -32,7 +35,10 @@ static int st_select(struct cpuidle_driver *drv,
 			   struct cpuidle_device *dev,
 			   bool *stop_tick)
 {
+	int ret = st_dev[dev->cpu].state;
 
+	printk("I will write the state %i to core %i",ret, dev->cpu);
+	
 	return 0;
 }
 
@@ -59,7 +65,7 @@ static int __init init_st(void)
     }
 
     real_register = (reg_gov_fn) reg_gov_addr;
-	st_setup(st_cpu_class, st_dev);
+	st_setup(&st_cpu_class, &st_dev);
     return real_register(&st_gov);
 }
 
