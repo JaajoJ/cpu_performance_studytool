@@ -55,7 +55,8 @@ void st_print_package_stats_json(const PackageStats *pkg)
 {
     char buf[128] = {0};
     int avg_idle[MAXIMUM_C_STATES] = {0};
-    int accepted_idle_cores = 0; // if core is disabled or isolated it is not accounted in the average.
+    int avg_idle_undetermined = 0;
+    //int accepted_idle_cores = 0; // if core is disabled or isolated it is not accounted in the average.
 
     printf("{");
     // CORE metrics
@@ -76,9 +77,9 @@ void st_print_package_stats_json(const PackageStats *pkg)
             avg_idle[idle_state] += pkg->coreStats[core_number].idle_time[idle_state];
         }
         printf(",");
-        if ( accept_core )
+        if ( !accept_core )
         {
-            ++accepted_idle_cores;
+            avg_idle_undetermined += 1000;
         }
     }
 
@@ -88,11 +89,12 @@ void st_print_package_stats_json(const PackageStats *pkg)
     {
         printf(",");
         sprintf(buf, "st.package.idle_state_avg.%i", idle_state);
-        if (accepted_idle_cores)
-        {
-            print_json_key(buf, avg_idle[idle_state] / accepted_idle_cores);
-        }
+        print_json_key(buf, avg_idle[idle_state] / pkg->all_cpus);
     }
+    printf(",");
+    sprintf(buf, "st.package.idle_state_avg.undetermined");
+    print_json_key(buf, avg_idle_undetermined / pkg->all_cpus);
+
     printf("}");
     printf("\n");
 }
