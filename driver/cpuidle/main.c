@@ -39,7 +39,7 @@ static int st_select(struct cpuidle_driver *drv,
 
 	printk("I will write the state %i to core %i",ret, dev->cpu);
 	
-	return 0;
+	return ret;
 }
 
 static void st_reflect(struct cpuidle_device *dev, int index)
