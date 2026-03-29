@@ -27,13 +27,6 @@ int write_string_addr(const char *addr, const char *s)
         return 1;
     }
 
-    ret = write(fd, "\n", 1);
-    if (ret < 0) {
-        perror("write_string_addr: write newline");
-        close(fd);
-        return 1;
-    }
-
     if (close(fd) < 0) {
         perror("write_string_addr: close");
         return 1;
