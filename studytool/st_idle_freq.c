@@ -527,7 +527,7 @@ int st_apply(STConfig * config)
 
     if ( enable_c_sates )
     {
-        printf("Enabling c-states %li\n", config->package.all_cpus);
+        printf("Enabling c-states\n");
         
         for (int i = 0; i < config->package.all_cpus; ++i)
         {
