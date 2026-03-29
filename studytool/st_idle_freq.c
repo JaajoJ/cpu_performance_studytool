@@ -114,8 +114,17 @@ PackageStats st_get_package()
     }
 
     // Governor information
-    read_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, package.current_governor, MAXIMUM_GOVERNOR_NAME);
+    read_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, package.current_governor, sizeof(package.current_governor));
     
+    read_string_addr(PACKAGE_AVAILABLE_GOVERNORS_ADDR, package.available_governors, sizeof(package.available_governors));
+    for ( int i = 0; i < strlen(package.available_governors); ++i) // convert to multi-string / string table format
+    {
+        if(package.available_governors[i] == '\n')
+        {
+            package.available_governors[i] = '\0';
+            ++ package.available_governor_count;
+        }
+    }
 
     return package;
 }

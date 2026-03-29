@@ -14,6 +14,7 @@
 #define CORE_LATENCY_ADDR "/sys/devices/system/cpu/cpu%i/power/pm_qos_resume_latency_us"
 
 #define PACKAGE_CURRENT_GOVERNOR_ADDR "/sys/devices/system/cpu/cpuidle/current_governor_ro"
+#define PACKAGE_AVAILABLE_GOVERNORS_ADDR "/sys/devices/system/cpu/cpuidle/available_governors"
 #define PACKAGE_ONLINE_CPU_ADDR "/sys/devices/system/cpu/online"
 
 #define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
@@ -29,6 +30,8 @@ typedef struct
 
 typedef struct  {
     char current_governor[MAXIMUM_GOVERNOR_NAME]; // /sys/devices/system/cpu/cpuidle/current_governor_ro
+    char available_governors[MAXIMUM_GOVERNOR_NAME * 8]; // MULTISTRING FORMAT: "governor1\0governor2\0" /sys/devices/system/cpu/cpuidle/available_governors
+    int available_governor_count;
     long online_cpus;
     long all_cpus;
     int available_idle_states;
