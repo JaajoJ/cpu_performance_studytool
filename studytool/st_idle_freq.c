@@ -473,6 +473,21 @@ int st_check_kmod()
     return is_module_loaded("st_module");
 }
 
+int st_check_governor( const char * available_governors_string_table, int available_governors_count )
+{
+    int offset = 0;
+    for (int i = 0; i < available_governors_count; ++i)
+    {
+        int ret = strcmp(available_governors_string_table + offset, ST_MODULE_GOVERNOR_NAME);
+        if (!ret)
+        {
+            return 1;
+        }
+        offset = (int) strlen(available_governors_string_table) + 1;
+    }
+    return 0;
+}
+
 int st_apply(STConfig * config)
 {
     int ret = 0;
@@ -490,6 +505,8 @@ int st_apply(STConfig * config)
         enable_latency_constraint = 1;
     if (st_check_kmod())
         enable_c_sates = 1;
+    if (st_check_governor(config->package.available_governors, config->package.available_governor_count))
+        enable_governor = 1;
 
     // DMA
     if ( enable_latency_constraint )
@@ -538,6 +555,12 @@ int st_apply(STConfig * config)
     {
         pthread_mutex_unlock(&latencyDMAThreadVals.stop_latency_constraint);
         pthread_join(dma_latency_thread, NULL);
+    }
+
+    if ( enable_governor )
+    {
+        printf("Disabling governor\n");
+        
     }
     return 0;
 

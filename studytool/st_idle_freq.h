@@ -21,6 +21,7 @@
 
 // st_module bindings
 #define ST_MODULE_C_STATE_ADDR "/sys/class/st_cpu/core%i/set_idle_state"
+#define ST_MODULE_GOVERNOR_NAME "st_governor"
 
 typedef struct  
 {
