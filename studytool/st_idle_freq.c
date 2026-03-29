@@ -115,7 +115,14 @@ PackageStats st_get_package()
 
     // Governor information
     read_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, package.current_governor, sizeof(package.current_governor));
-    
+    for (size_t i = 0; i < strlen(package.current_governor); ++i) 
+    {
+        if(package.current_governor[i] == '\n')
+        {
+            package.current_governor[i] = '\0';
+        }
+    }
+
     read_string_addr(PACKAGE_AVAILABLE_GOVERNORS_ADDR, package.available_governors, sizeof(package.available_governors));
     for (size_t i = 0; i < strlen(package.available_governors); ++i) // convert to multi-string / string table format
     {
