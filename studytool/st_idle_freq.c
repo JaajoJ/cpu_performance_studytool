@@ -12,6 +12,20 @@
 
 // https://docs.kernel.org/admin-guide/pm/cpuidle.html
 
+int write_string_addr(const char * addr, const char * s)
+{
+    int fd = open(addr, O_WRONLY);
+    if (fd < 0) {
+        perror("write_string_addr");
+        return 1;
+    }
+    
+    size_t bytes_wrote = write(fd, s, strlen(s));
+    bytes_wrote += write(fd, "\n", 1);
+
+    close(fd);
+    return 0;
+}
 
 // get functions. Convert last char to \0 to avoid newline
 int read_string_addr(const char * addr, char * buffer, size_t buffer_len)
@@ -27,6 +41,7 @@ int read_string_addr(const char * addr, char * buffer, size_t buffer_len)
     while ((bytes_read = read(fd, buffer, buffer_len - 1)) > 0) {
         buffer[bytes_read] = '\0';
     }
+    close(fd);
     return 0;
 }
 
@@ -520,7 +535,7 @@ int st_apply(STConfig * config)
     if ( enable_governor )
     {
         printf("Enabling governor\n");
-        
+        write_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, ST_MODULE_GOVERNOR_NAME);   
     }
 
     // Setup C-States
@@ -560,7 +575,7 @@ int st_apply(STConfig * config)
     if ( enable_governor )
     {
         printf("Disabling governor\n");
-        
+        write_string_addr(PACKAGE_CURRENT_GOVERNOR_ADDR, config->package.current_governor);   
     }
     return 0;
 
