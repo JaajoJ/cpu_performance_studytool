@@ -203,16 +203,25 @@ int st_get_core_idle_delta(PackageStats * package_stats)
     for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
     {
         combined_time = 0;
-        for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++ idle_state )
-        {
+        for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++idle_state)
             combined_time += c_states_time[core_number][idle_state];
-        }
-        if ( combined_time )
+
+        if (combined_time)
         {
-            for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++ idle_state )
+            long sum = 0;
+            int largest = 0;
+
+            for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++idle_state)
             {
-                package_stats->coreStats[core_number].idle_time[idle_state] = (c_states_time[core_number][idle_state] * 1000) / combined_time;
+                package_stats->coreStats[core_number].idle_time[idle_state] =
+                    (c_states_time[core_number][idle_state] * 1000) / combined_time;
+                sum += package_stats->coreStats[core_number].idle_time[idle_state];
+
+                if (c_states_time[core_number][idle_state] > c_states_time[core_number][largest])
+                    largest = idle_state;
             }
+
+            package_stats->coreStats[core_number].idle_time[largest] += 1000 - sum;
         }
     }
     return 0;
