@@ -45,6 +45,8 @@ typedef struct  {
     long online_cpus;
     long all_cpus;
     int available_idle_states;
+    long max_frequency;
+    long min_frequency;
     IdleCoreStats coreStats[MAXIMUM_CORES];
 } PackageStats;
 

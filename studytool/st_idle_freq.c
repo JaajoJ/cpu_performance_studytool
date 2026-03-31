@@ -159,6 +159,12 @@ PackageStats st_get_package()
         }
     }
 
+    // Frequency
+    
+    read_int_addr(PACKAGE_MAX_FREQUENCY, &package.max_frequency);
+
+    read_int_addr(PACKAGE_MIN_FREQUENCY, &package.min_frequency);
+
     return package;
 }
 
@@ -326,50 +332,35 @@ int st_set_default_config(char * config_path)
     }
 
     // write goal frequencies
-    long max_frequency = 0;
-    long min_frequency = 0;
-    bool frequency_available = true;
     
-    if ( read_int_addr(PACKAGE_MAX_FREQUENCY, &max_frequency))
-        frequency_available = false;
 
-    if ( read_int_addr(PACKAGE_MIN_FREQUENCY, &min_frequency))
-        frequency_available = false;
-
-    if (frequency_available)
-    { 
-        for( int freq = max_frequency; freq >= (int) min_frequency; freq -= ST_FREQ_STEP)
+    for( int freq = package.max_frequency; freq >= (int) package.min_frequency; freq -= ST_FREQ_STEP)
+    {
+        buf2[0] = '\0';
+        buf[0] = '\0';
+        if (freq == package.max_frequency)
         {
-            buf2[0] = '\0';
-            buf[0] = '\0';
-            if (freq == max_frequency)
+            for (int i = 0; i < package.all_cpus; ++i)
             {
-                for (int i = 0; i < package.all_cpus; ++i)
+                sprintf(buf2, "%d", i);
+                strcat(buf, buf2);
+                if (i + 1 != package.all_cpus)
                 {
-                    sprintf(buf2, "%d", i);
-                    strcat(buf, buf2);
-                    if (i + 1 != package.all_cpus)
-                    {
-                        strcat(buf, ",");
-                    }
+                    strcat(buf, ",");
                 }
             }
-
-            sprintf(buf2, " # Frequency target %i for CPUS\n", freq);
-
-            strcat(buf, buf2);
-
-            if (write(fd, buf, strlen(buf)) == -1)
-            {
-                fprintf(stderr, "Unable to write to config file\n");
-                close(fd);
-                return 1;
-            }
         }
-    }
-    else
-    {
-        fprintf(stderr, "Unable to read frequency information for CPU\n");   
+
+        sprintf(buf2, " # Frequency target %i for CPUS\n", freq);
+
+        strcat(buf, buf2);
+
+        if (write(fd, buf, strlen(buf)) == -1)
+        {
+            fprintf(stderr, "Unable to write to config file\n");
+            close(fd);
+            return 1;
+        }
     }
 
     close(fd);
@@ -466,6 +457,12 @@ int st_get_config(STConfig * config, char * config_path)
             if (read_buf[offset] == '#')
                 break;
         }
+    }
+
+    // Parse target frequencies
+    for (long i = 0; i < config->package.available_idle_states; ++i)
+    {
+
     }
 
 
