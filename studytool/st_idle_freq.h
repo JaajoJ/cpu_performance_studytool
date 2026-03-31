@@ -8,7 +8,7 @@
 // CONFIGS
 #define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
 #define ST_CONFIG_DEFAULTS {200,{0},{0},st_get_package()}
-#define ST_FREQ_STEP 200000
+#define ST_FREQ_STEP 400000
 
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
