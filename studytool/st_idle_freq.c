@@ -617,21 +617,24 @@ int st_check_governor( const char * available_governors_string_table, int availa
 
 int st_set_freq(const int core, int min_freq, int max_freq)
 {
-    char buf[64] = {0};
+    char buf[32] = {0};
+    char addr[128] = {0};
     long min = 0;
     long max = 0;
-    sprintf(buf, CORE_MIN_FREQUENCY, core);
-    read_int_addr(buf, &min);
-    sprintf(buf, CORE_MAX_FREQUENCY, core);
-    read_int_addr(buf, &max);
+    sprintf(addr, CORE_MIN_FREQUENCY, core);
+    read_int_addr(addr, &min);
+    sprintf(addr, CORE_MAX_FREQUENCY, core);
+    read_int_addr(addr, &max);
 
     min_freq = MAX(min, MIN(min_freq, max));
     max_freq = MAX(min, MIN(max_freq, max));
     
     sprintf(buf, "%i", min_freq);
-    write_string_addr(CORE_SCALING_MIN_FREQUENCY, buf);
+    sprintf(addr, CORE_SCALING_MIN_FREQUENCY, core);
+    write_string_addr(addr, buf);
     sprintf(buf, "%i", max_freq);
-    write_string_addr(CORE_SCALING_MAX_FREQUENCY, buf);
+    sprintf(addr, CORE_SCALING_MAX_FREQUENCY, core);
+    write_string_addr(addr, buf);
     return 0;
 }
 
