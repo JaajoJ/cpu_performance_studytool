@@ -395,7 +395,7 @@ int read_line(int fd, char * buf, ssize_t max_length)
 int st_get_config(STConfig * config, char * config_path)
 {
     int fd;
-    char read_buf[256] = {0};
+    char read_buf[512] = {0};
     
     memset(config, 0, sizeof(STConfig));
     config->package = st_get_package();
@@ -411,7 +411,7 @@ int st_get_config(STConfig * config, char * config_path)
 
     // Parse DMA latency
 
-    if (read_line(fd, read_buf, 256))
+    if (read_line(fd, read_buf, 512))
     {
         fprintf(stderr, "Line length too big for DMA latency.\n");
         close(fd);
@@ -429,7 +429,7 @@ int st_get_config(STConfig * config, char * config_path)
     for (long i = 0; i < config->package.available_idle_states; ++i)
     {
         memset(read_buf, 0, sizeof(read_buf));
-        if (read_line(fd, read_buf, 256))
+        if (read_line(fd, read_buf, 512))
         {
             fprintf(stderr, "Line length too big for C-state %ld.\n", i);
             close(fd);
@@ -460,8 +460,36 @@ int st_get_config(STConfig * config, char * config_path)
     }
 
     // Parse target frequencies
-    for (long i = 0; i < config->package.available_idle_states; ++i)
+    for (long i = config->package.max_frequency; i >= config->package.min_frequency; i -= ST_FREQ_STEP)
     {
+        memset(read_buf, 0, sizeof(read_buf));
+        if (read_line(fd, read_buf, 512))
+        {
+            fprintf(stderr, "Line length too big for frequency %ld.\n", i);
+            close(fd);
+            return 1;
+        }
+        int offset = 0;
+        int val, n;
+        while (sscanf(&read_buf[offset], "%d%n", &val, &n) == 1) {
+            offset += n;
+            if (val < config->package.all_cpus)
+            {
+                config->core_target_frequency[val] = i;
+                printf("Configured CPU %i frequency target %ld.\n", val, i);
+            }
+            else
+            {
+                fprintf(stderr, "Invalid CPU found: %i\n", val);
+                close(fd);
+                return 1;
+            }
+
+            if (read_buf[offset] == ',')
+                ++offset;
+            if (read_buf[offset] == '#')
+                break;
+        }
 
     }
 
