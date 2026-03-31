@@ -32,6 +32,7 @@ void st_print_package_stats(const PackageStats *pkg)
 
         printf("\nCPU %ld\n", cpu);
         printf("  Max latency : %ld us\n", core->max_latency);
+        printf("  Frequency : %i kHz\n", core->current_frequency);
 
         printf("  Idle state times:\n");
 
