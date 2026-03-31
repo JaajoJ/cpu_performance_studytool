@@ -103,6 +103,7 @@ int st_collect(const int core, const char output_mode)
 {
     PackageStats package = st_get_package();
     st_get_core_idle_delta(&package);
+    st_get_core_frequency(&package);
 
     if ( output_mode == 'h' )
     {
@@ -129,7 +130,7 @@ PackageStats st_get_package()
     package.all_cpus = sysconf(_SC_NPROCESSORS_CONF);
     package.available_idle_states = get_available_c_states();
 
-    //printf("this %ld\n", package.all_cpus);
+    // Max latency cpu_idle
     for ( int core_id = 0; core_id < package.all_cpus; ++core_id )
     {
         sprintf(addr_buf, CORE_LATENCY_ADDR, core_id);
@@ -171,6 +172,25 @@ int get_core_idle(long * c_state_idle, const int core_number, const int availabl
     }
     return 0;
 
+}
+
+int get_core_freq(int * core_freq, const int core_number)
+{
+    char addr_buf[128] = "";
+    long value = 0;
+    sprintf(addr_buf, CORE_FREQ_ADDR, core_number);
+    read_int_addr(addr_buf,  &value);
+    *core_freq = (int) value;
+    return 0;
+
+}
+
+int st_get_core_frequency(PackageStats * package_stats)
+{
+    for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
+    {
+        get_core_freq(&package_stats->coreStats[core_number].current_frequency, core_number);
+    }
 }
 
 int st_get_core_idle_delta(PackageStats * package_stats)
