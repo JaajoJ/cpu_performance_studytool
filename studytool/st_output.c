@@ -63,6 +63,7 @@ void st_print_package_stats_json(const PackageStats *pkg)
     // CORE metrics
     for (int core_number = 0; core_number < pkg->all_cpus; ++core_number)
     {
+        // C-state
         sprintf(buf, "st.core.%i.configured_max_latency", core_number);
         print_json_key(buf, pkg->coreStats[core_number].max_latency);
         int accept_core = false;
@@ -82,6 +83,11 @@ void st_print_package_stats_json(const PackageStats *pkg)
         {
             avg_idle_undetermined += 1000;
         }
+
+        // frequency
+        sprintf(buf, "st.core.%i.freq_khz", core_number);
+        print_json_key(buf, pkg->coreStats[core_number].current_frequency);
+        printf(",");
     }
 
     // PACKAGES metrics
