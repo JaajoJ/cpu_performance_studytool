@@ -8,6 +8,7 @@
 // CONFIGS
 #define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
 #define ST_CONFIG_DEFAULTS {200,{0},{0},st_get_package()}
+#define ST_FREQ_STEP 200000
 
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
@@ -21,6 +22,8 @@
 #define PACKAGE_AVAILABLE_GOVERNORS_ADDR "/sys/devices/system/cpu/cpuidle/available_governors"
 #define PACKAGE_ONLINE_CPU_ADDR "/sys/devices/system/cpu/online"
 #define PACKAGE_INTEL_PSTATE_DISABLE "/sys/devices/system/cpu/intel_pstate/status"
+#define PACKAGE_MAX_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
+#define PACKAGE_MIN_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
 
 #define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
 
