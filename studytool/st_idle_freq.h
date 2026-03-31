@@ -7,7 +7,7 @@
 
 // CONFIGS
 #define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
-#define ST_CONFIG_DEFAULTS {200,{0},st_get_package()}
+#define ST_CONFIG_DEFAULTS {200,{0},{0},st_get_package()}
 
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
@@ -61,6 +61,8 @@ int st_set_default_config(char * config_path);
 void st_modify(char *path);
 
 PackageStats st_get_package();
+
+int st_get_core_frequency(PackageStats * package_stats);
 
 int st_get_core_idle_delta(PackageStats * package_stats);
 

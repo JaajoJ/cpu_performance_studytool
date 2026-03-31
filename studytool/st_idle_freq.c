@@ -191,6 +191,7 @@ int st_get_core_frequency(PackageStats * package_stats)
     {
         get_core_freq(&package_stats->coreStats[core_number].current_frequency, core_number);
     }
+    return 0;
 }
 
 int st_get_core_idle_delta(PackageStats * package_stats)
