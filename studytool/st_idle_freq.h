@@ -12,11 +12,15 @@
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
 #define CORE_LATENCY_ADDR "/sys/devices/system/cpu/cpu%i/power/pm_qos_resume_latency_us"
+#define CORE_FREQ_ADDR "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_cur_freq"
+#define CORE_SCALING_MIN_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_min_freq"
+#define CORE_SCALING_MAX_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_max_freq"
 
 #define PACKAGE_CURRENT_GOVERNOR_ADDR "/sys/devices/system/cpu/cpuidle/current_governor_ro"
 #define PACKAGE_CURRENT_GOVERNOR_W_ADDR "/sys/devices/system/cpu/cpuidle/current_governor"
 #define PACKAGE_AVAILABLE_GOVERNORS_ADDR "/sys/devices/system/cpu/cpuidle/available_governors"
 #define PACKAGE_ONLINE_CPU_ADDR "/sys/devices/system/cpu/online"
+#define PACKAGE_INTEL_PSTATE_DISABLE "/sys/devices/system/cpu/intel_pstate/status"
 
 #define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
 
@@ -44,6 +48,7 @@ typedef struct
 {
     int dma_latency_us;
     int core_target_c_state[MAXIMUM_CORES];
+    int core_target_frequency[MAXIMUM_CORES];
     PackageStats package;
 } STConfig;
 
