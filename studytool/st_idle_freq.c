@@ -7,6 +7,8 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/syscall.h>
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 #include "st_output.h"
 #include "st_idle_freq.h"
 
@@ -613,6 +615,26 @@ int st_check_governor( const char * available_governors_string_table, int availa
     return 0;
 }
 
+int st_set_freq(const int core, int min_freq, int max_freq)
+{
+    char buf[64] = {0};
+    long min = 0;
+    long max = 0;
+    sprintf(buf, CORE_MIN_FREQUENCY, core);
+    read_int_addr(buf, &min);
+    sprintf(buf, CORE_MAX_FREQUENCY, core);
+    read_int_addr(buf, &max);
+
+    min_freq = MAX(min, MIN(min_freq, max));
+    max_freq = MAX(min, MIN(max_freq, max));
+    
+    sprintf(buf, "%i", min_freq);
+    write_string_addr(CORE_SCALING_MIN_FREQUENCY, buf);
+    sprintf(buf, "%i", max_freq);
+    write_string_addr(CORE_SCALING_MAX_FREQUENCY, buf);
+    return 0;
+}
+
 int st_apply(STConfig * config)
 {
     int ret = 0;
@@ -622,16 +644,20 @@ int st_apply(STConfig * config)
     pthread_t dma_latency_thread;
 
     // Check settings
-    bool enable_latency_constraint = 0;
-    bool enable_governor = 0;
-    bool enable_c_sates = 0;
-    
+    bool enable_latency_constraint = false;
+    bool enable_governor = false;
+    bool enable_c_sates = false;
+    bool enable_frequency = false;
+
     if (config->dma_latency_us > -1)
         enable_latency_constraint = 1;
     if (st_check_kmod())
-        enable_c_sates = 1;
+        enable_c_sates = true;
     if (st_check_governor(config->package.available_governors, config->package.available_governor_count))
-        enable_governor = 1;
+        enable_governor = true;
+    if ( config->package.max_frequency && config->package.min_frequency )
+        enable_frequency = true;
+
 
     // DMA
     if ( enable_latency_constraint )
@@ -656,13 +682,29 @@ int st_apply(STConfig * config)
         }
     }
 
-      // SETUP GOVERNOR
+    // SETUP GOVERNOR
     if ( enable_governor )
     {
         printf("Enabling governor\n");
         write_string_addr(PACKAGE_CURRENT_GOVERNOR_W_ADDR, ST_MODULE_GOVERNOR_NAME);   
     }
 
+    // Setup frequencies
+    if ( enable_frequency )
+    {
+        // Disable intel_pstate control
+        write_string_addr(PACKAGE_INTEL_PSTATE_DISABLE, "passive");
+        
+        for (int i = 0; i < config->package.all_cpus; ++i)
+        {
+            ret = st_set_freq(i, config->core_target_frequency[i], config->core_target_frequency[i]);
+            if ( ret )
+            {
+                fprintf(stderr, "Failed to set C-state for cpu %i state %i", i, config->core_target_c_state[i]);
+            }
+        }
+
+    }
 
 
     // Loop until stop
@@ -682,10 +724,23 @@ int st_apply(STConfig * config)
         pthread_join(dma_latency_thread, NULL);
     }
 
+    // stop governor
     if ( enable_governor )
     {
         printf("Disabling governor\n");
         write_string_addr(PACKAGE_CURRENT_GOVERNOR_W_ADDR, config->package.current_governor);   
+    }
+
+    // stop frequency
+    if ( enable_frequency )
+    {
+        // Disable intel_pstate control
+        write_string_addr(PACKAGE_INTEL_PSTATE_DISABLE, "active");
+        for ( int core = 0; core < config->package.all_cpus; ++core)
+        {
+            st_set_freq(core, config->package.min_frequency, config->package.max_frequency);
+        }
+
     }
     return 0;
 

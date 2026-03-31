@@ -16,6 +16,8 @@
 #define CORE_FREQ_ADDR "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_cur_freq"
 #define CORE_SCALING_MIN_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_min_freq"
 #define CORE_SCALING_MAX_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_max_freq"
+#define CORE_MAX_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/cpuinfo_max_freq"
+#define CORE_MIN_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/cpuinfo_min_freq"
 
 #define PACKAGE_CURRENT_GOVERNOR_ADDR "/sys/devices/system/cpu/cpuidle/current_governor_ro"
 #define PACKAGE_CURRENT_GOVERNOR_W_ADDR "/sys/devices/system/cpu/cpuidle/current_governor"
