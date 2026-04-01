@@ -39,7 +39,6 @@ static int st_select(struct cpuidle_driver *drv,
 
 	//printk("I will write the state %i to core %i",ret, dev->cpu);
 	*stop_tick = 1;
-	printk("yeah\n");
 	return ret;
 }
 
