@@ -12,16 +12,8 @@ MODULE_DESCRIPTION("Module for developing the study tool");
 static int cpu_count;
 static int c_state_count;
 
-
-static struct device_attribute c_state_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
-    .attr  = { .name = "set_idle_state", .mode = 0222 },
-    .store = value_store,
-};
-
-static struct device_attribute c_state_enforce_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
-    .attr  = { .name = "set_idle_state_enforce", .mode = 0222 },
-    .store = value_store,
-};
+static struct device_attribute c_state_attr;
+static struct device_attribute c_state_enforce_attr;
 
 static ssize_t value_store(struct device *dev,
                             struct device_attribute *attr,
@@ -49,6 +41,16 @@ static ssize_t value_store(struct device *dev,
 
     return count;
 }
+
+static struct device_attribute c_state_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
+    .attr  = { .name = "set_idle_state", .mode = 0222 },
+    .store = value_store,
+};
+
+static struct device_attribute c_state_enforce_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
+    .attr  = { .name = "set_idle_state_enforce", .mode = 0222 },
+    .store = value_store,
+};
 
 
 
