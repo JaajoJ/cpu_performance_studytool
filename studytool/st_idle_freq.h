@@ -7,7 +7,7 @@
 
 // CONFIGS
 #define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
-#define ST_CONFIG_DEFAULTS {200,{0},{0},st_get_package()}
+#define ST_CONFIG_DEFAULTS {200,{0},{0},{0},st_get_package()}
 #define ST_FREQ_STEP 200000
 
 // Addresses for stats
@@ -31,6 +31,7 @@
 
 // st_module bindings
 #define ST_MODULE_C_STATE_ADDR "/sys/class/st_cpu/core%i/set_idle_state"
+#define ST_MODULE_C_STATE_ENFORCE_ADDR "/sys/class/st_cpu/core%i/set_idle_state_enforce"
 #define ST_MODULE_GOVERNOR_NAME "st_governor"
 
 typedef struct  
@@ -56,6 +57,7 @@ typedef struct
 {
     int dma_latency_us;
     int core_target_c_state[MAXIMUM_CORES];
+    int core_target_c_state_enforce[MAXIMUM_C_STATES];
     int core_target_frequency[MAXIMUM_CORES];
     PackageStats package;
 } STConfig;
@@ -77,6 +79,6 @@ int st_collect(const int core, const char output_mode);
 
 int st_apply(STConfig * config);
 
-int st_set_c_state(int core, int state);
+int st_set_c_state(int core, int state, const char * address_format);
 
 #endif

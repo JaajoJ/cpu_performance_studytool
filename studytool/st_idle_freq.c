@@ -353,6 +353,24 @@ int st_set_default_config(char * config_path)
         }
     }
 
+    // Write goal c-state enforce
+    for (int i = 0; i < package.available_idle_states; ++i )
+    {
+        buf2[0] = '\0';
+        buf[0] = '\0';
+
+        sprintf(buf2, "100 # C-state %i enforcing %%\n", i);
+
+        strcat(buf, buf2);
+
+        if (write(fd, buf, strlen(buf)) == -1)
+        {
+            fprintf(stderr, "Unable to write to config file\n");
+            close(fd);
+            return 1;
+        }
+    }
+
     // write goal frequencies
     
 
@@ -481,6 +499,24 @@ int st_get_config(STConfig * config, char * config_path)
         }
     }
 
+    // Parse idle enforce
+
+    for (long i = 0; i < config->package.available_idle_states; ++i)
+    {
+        memset(read_buf, 0, sizeof(read_buf));
+        if (read_line(fd, read_buf, 512))
+        {
+            fprintf(stderr, "Line length too big for C-state %ld.\n", i);
+            close(fd);
+            return 1;
+        }
+
+        int val, n;
+        sscanf(read_buf, "%d%n", &val, &n);
+        config->core_target_c_state_enforce[i] = val;
+        printf("Configured C-state %ld C-state enforcing at  %i %%.\n", i, val);
+    }
+
     // Parse target frequencies
     for (long i = config->package.max_frequency; i >= config->package.min_frequency; i -= ST_FREQ_STEP)
     {
@@ -566,12 +602,12 @@ void* set_dma_latency_thread(void* arg) {
     return NULL;
 }
 
-int st_set_c_state(int core, int state)
+int st_set_c_state(int core, int state, const char * address_format)
 {
     int fd;
     char module_path[64] = {0};
 
-    snprintf(module_path, sizeof(module_path), ST_MODULE_C_STATE_ADDR, core);
+    snprintf(module_path, sizeof(module_path), address_format, core);
     fd = open(module_path, O_WRONLY);
     if (fd == -1) 
     {
@@ -702,7 +738,14 @@ int st_apply(STConfig * config)
         
         for (int i = 0; i < config->package.all_cpus; ++i)
         {
-            ret = st_set_c_state(i, config->core_target_c_state[i]);
+            int configured_c_state = config->core_target_c_state[i];
+            ret = st_set_c_state(i, configured_c_state, ST_MODULE_C_STATE_ADDR);
+            if ( ret )
+            {
+                fprintf(stderr, "Failed to set C-state for cpu %i state %i", i, config->core_target_c_state[i]);
+            }
+
+            ret = st_set_c_state(i, config->core_target_c_state_enforce[configured_c_state], ST_MODULE_C_STATE_ENFORCE_ADDR);
             if ( ret )
             {
                 fprintf(stderr, "Failed to set C-state for cpu %i state %i", i, config->core_target_c_state[i]);
