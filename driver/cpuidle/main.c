@@ -9,6 +9,7 @@
 #include <linux/cpuidle.h>
 #include <linux/init.h>
 #include <linux/kallsyms.h>
+#include <linux/random.h>
 #include <linux/kprobes.h>
 #include "../src/st_lib.h"
 
@@ -36,9 +37,15 @@ static int st_select(struct cpuidle_driver *drv,
 			   bool *stop_tick)
 {
 	int ret = st_dev[dev->cpu].state;
+	int enforce = st_dev[dev->cpu].enforce;
+	u32 val = get_random_u32_below(101);
 
-	//printk("I will write the state %i to core %i",ret, dev->cpu);
 	*stop_tick = 1;
+
+	if (enforce < val) {
+		return 0;
+	}
+
 	return ret;
 }
 
