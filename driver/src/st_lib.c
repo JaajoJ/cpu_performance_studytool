@@ -23,10 +23,10 @@ static ssize_t value_store(struct device *dev,
     if (ret)
         return ret;
 
-    printk(KERN_INFO "hello: received %d\n", value);
+    printk(KERN_INFO "st_lib: received %d\n", value);
 
     core->state = value % c_state_count;
-    printk(KERN_INFO "hello: set new value to core %d value %d\n", core->core, core->state);
+    printk(KERN_INFO "st_lib: set new value to core %d value %d\n", core->core, core->state);
     
     return count;
 }
@@ -69,7 +69,7 @@ int st_setup(struct class ** st_cpu_class, struct stDev ** st_dev)
     cpu_count = num_present_cpus();
     struct cpuidle_driver *drv = cpuidle_get_driver();
     if (!drv) {
-        pr_err("hello: no cpuidle driver found\n");
+        pr_err("st_lib: no cpuidle driver found\n");
         return -ENODEV;
     }
     
@@ -80,7 +80,7 @@ int st_setup(struct class ** st_cpu_class, struct stDev ** st_dev)
 
     *st_dev = kzalloc(cpu_count * sizeof(struct stDev), GFP_KERNEL); 
     if (!*st_dev) 
-        pr_err("hello: Failed kzalloc\n");
+        pr_err("st_lib: Failed kzalloc\n");
 
     // Create device files
     *st_cpu_class = class_create("st_cpu"); // Class for /sys/class/misc_device/
@@ -106,7 +106,7 @@ int st_setup(struct class ** st_cpu_class, struct stDev ** st_dev)
         //      C-state
         device_create_file((*st_dev)[i].dev, &c_state_attr);
     }
-    printk(KERN_INFO "hello: /sys/class/st_cpu/core<X>/set_idle_state\n");
+    printk(KERN_INFO "st_lib: /sys/class/st_cpu/core<X>/set_idle_state\n");
     return 0;
 }
 
@@ -121,6 +121,6 @@ int st_destroy(struct class ** st_cpu_class, struct stDev ** st_dev)
     kfree(*st_dev);
     *st_dev = NULL;
     *st_cpu_class = NULL;
-    printk(KERN_INFO "hello: module unloaded\n");
+    printk(KERN_INFO "st_lib: module unloaded\n");
     return 0;
 }
