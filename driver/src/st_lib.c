@@ -12,6 +12,17 @@ MODULE_DESCRIPTION("Module for developing the study tool");
 static int cpu_count;
 static int c_state_count;
 
+
+static struct device_attribute c_state_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
+    .attr  = { .name = "set_idle_state", .mode = 0222 },
+    .store = value_store,
+};
+
+static struct device_attribute c_state_enforce_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
+    .attr  = { .name = "set_idle_state_enforce", .mode = 0222 },
+    .store = value_store,
+};
+
 static ssize_t value_store(struct device *dev,
                             struct device_attribute *attr,
                             const char *buf, size_t count)
@@ -25,17 +36,21 @@ static ssize_t value_store(struct device *dev,
 
     printk(KERN_INFO "st_lib: received %d\n", value);
 
-    core->state = value % c_state_count;
-    printk(KERN_INFO "st_lib: set new value to core %d value %d\n", core->core, core->state);
-    
+    if (attr == &c_state_attr) 
+    {
+        core->state = value % c_state_count;
+        printk(KERN_INFO "st_lib: set new value to core %d value %d\n", core->core, core->state);
+    } 
+    else if (attr == &c_state_enforce_attr) 
+    {
+        core->state = value % 100;
+        printk(KERN_INFO "st_lib: set core %d to enforce by %d %% \n", core->core, core->enforce);
+    }
+
     return count;
 }
 
 
-static struct device_attribute c_state_attr = {     // Device file for /sys/class/st_cpu/core<X>/set_idle_state
-    .attr  = { .name = "set_idle_state", .mode = 0222 },
-    .store = value_store,
-};
 
 static void set_core_name(char * buf, int value)
 {
@@ -105,6 +120,9 @@ int st_setup(struct class ** st_cpu_class, struct stDev ** st_dev)
 
         //      C-state
         device_create_file((*st_dev)[i].dev, &c_state_attr);
+
+        //      C-state Enforce
+        device_create_file((*st_dev)[i].dev, &c_state_enforce_attr);
     }
     printk(KERN_INFO "st_lib: /sys/class/st_cpu/core<X>/set_idle_state\n");
     return 0;
@@ -115,6 +133,7 @@ int st_destroy(struct class ** st_cpu_class, struct stDev ** st_dev)
     for (int i = 0; i < cpu_count; ++i)
     {
         device_remove_file((*st_dev)[i].dev, &c_state_attr);
+        device_remove_file((*st_dev)[i].dev, &c_state_enforce_attr);
         device_destroy(*st_cpu_class, (*st_dev)[i].dev->devt);
     }
     class_destroy(*st_cpu_class);

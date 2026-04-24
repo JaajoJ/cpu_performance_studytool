@@ -8,6 +8,7 @@ struct stDev {
     struct device * dev;
     char core_name[8];
     int state;
+    int enforce; // Value between 0-100 which states how much the state will be enforced. 100 -> 100% only configured state is possible.
     int core;
 };
 
