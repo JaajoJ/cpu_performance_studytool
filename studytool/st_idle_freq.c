@@ -7,12 +7,32 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/syscall.h>
+#include <signal.h>
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #include "st_output.h"
 #include "st_idle_freq.h"
 
 // https://docs.kernel.org/admin-guide/pm/cpuidle.html
+
+
+volatile sig_atomic_t running = 1;
+
+void signal_handler(int sig) {
+    switch (sig) {
+        case SIGINT:
+            printf("\nSignal captured... Terminating...\n");
+            running = 0;
+            break;
+        case SIGTERM:
+            printf("\nSignal captured... Terminating...\n");
+            running = 0;
+            break;
+        case SIGHUP:
+            printf("\nCaught SIGHUP - reloading config...\n");
+            break;
+    }
+}
 
 int write_string_addr(const char *addr, const char *s)
 {
@@ -642,6 +662,11 @@ int st_apply(STConfig * config)
 {
     int ret = 0;
 
+    // Signal handlers
+    signal(SIGINT,  signal_handler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGHUP,  signal_handler);
+
     // initialize values
     latencyThread latencyDMAThreadVals = {config->dma_latency_us, PTHREAD_MUTEX_INITIALIZER};;
     pthread_t dma_latency_thread;
@@ -711,13 +736,10 @@ int st_apply(STConfig * config)
 
 
     // Loop until stop
-    int wait ; //  = getchar();
-    wait = 0;
-    while( wait != '\n')
-    {
-        printf("Press Enter to exit...\n");
-        wait = getchar();
-    }
+
+    printf("Press ctrl+c to exit...\n");
+    while (running)
+        pause();
 
 
     // stop latency constraint
