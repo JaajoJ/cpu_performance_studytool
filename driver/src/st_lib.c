@@ -35,7 +35,7 @@ static ssize_t value_store(struct device *dev,
     } 
     else if (attr == &c_state_enforce_attr) 
     {
-        core->state = value % 100;
+        core->enforce = value % 100;
         printk(KERN_INFO "st_lib: set core %d to enforce by %d %% \n", core->core, core->enforce);
     }
 
