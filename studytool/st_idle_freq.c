@@ -36,6 +36,8 @@ void signal_handler(int sig) {
 
 int write_string_addr(const char *addr, const char *s)
 {
+    printf("Writing %s to %s\n", s, addr);
+
     int fd = open(addr, O_WRONLY);
     if (fd < 0) {
         perror("write_string_addr");
