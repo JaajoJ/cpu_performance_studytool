@@ -42,9 +42,12 @@ static int st_select(struct cpuidle_driver *drv,
 
 	*stop_tick = 1;
 
-	if (enforce < val) {
-		return 0;
+	if (val < enforce) {
+		*stop_tick = true;
+		return ret;
 	}
+	*stop_tick = false;
+	return 0;
 
 	return ret;
 }
