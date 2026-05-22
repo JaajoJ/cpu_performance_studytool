@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -DRELEASE_NAME='"v0.02"'
+CFLAGS = -Wall -Wextra -O2 -DRELEASE_NAME='"v0.03"'
 
 TARGET = idlefreq_stat
 
