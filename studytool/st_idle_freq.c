@@ -371,9 +371,9 @@ int st_set_default_config(char * config_path)
     }
 
     // write uncore frequency
-    if ( package.max_uncore_frequency == -1 || package.min_uncore_frequency == -1)
+    if ( package.max_uncore_frequency == 0 || package.min_uncore_frequency == 0)
     {
-        if (write(fd, "-1 # Uncore driver not functional on this system.\n", strlen(" # Uncore driver not functional on this system.\n")) == -1)
+        if (write(fd, "-1 # Uncore driver not functional on this system.\n", strlen("-1 # Uncore driver not functional on this system.\n")) == -1)
         {
             fprintf(stderr, "Unable to write to config file\n");
             close(fd);
