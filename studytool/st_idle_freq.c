@@ -370,6 +370,29 @@ int st_set_default_config(char * config_path)
         return 1;
     }
 
+    // write uncore frequency
+    if ( package.max_uncore_frequency == -1 || package.min_uncore_frequency == -1)
+    {
+        if (write(fd, "-1 # Uncore driver not functional on this system.\n", strlen(" # Uncore driver not functional on this system.\n")) == -1)
+        {
+            fprintf(stderr, "Unable to write to config file\n");
+            close(fd);
+            return 1;
+        }
+    }
+    else
+    {
+        sprintf(buf, "%d # Uncore frequency. Available frequencies: %d - %d\n", package.max_uncore_frequency, package.min_uncore_frequency, package.max_uncore_frequency);
+
+        if (write(fd, buf, strlen(buf)) == -1)
+        {
+            fprintf(stderr, "Unable to write to config file\n");
+            close(fd);
+            return 1;
+        }
+    }
+
+
     // write goal c-states
     for (int i = 0; i < package.available_idle_states; ++i )
     {
@@ -507,6 +530,21 @@ int st_get_config(STConfig * config, char * config_path)
     if (sscanf(read_buf, "%i", &config->dma_latency_us) != 1)
     {
         fprintf(stderr, "Invalid format for DMA latency.\n");
+        close(fd);
+        return 1;
+    }
+
+    // Parse Uncore frequency
+
+    if (read_line(fd, read_buf, 512))
+    {
+        fprintf(stderr, "Line length too big for DMA latency.\n");
+        close(fd);
+        return 1;
+    }
+    if (sscanf(read_buf, "%i", &config->uncore_frequency) != 1)
+    {
+        fprintf(stderr, "Invalid format for uncore frequency.\n");
         close(fd);
         return 1;
     }
