@@ -82,6 +82,7 @@ int read_int_addr(const char *addr, long *output_int)
     int fd = open(addr, O_RDONLY);
     if (fd < 0) {
         perror("read_int_addr");
+        *output_int = -1;
         return -1;
     }
 
