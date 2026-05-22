@@ -382,7 +382,7 @@ int st_set_default_config(char * config_path)
     }
     else
     {
-        sprintf(buf, "%d # Uncore frequency. Available frequencies: %d - %d\n", package.max_uncore_frequency, package.min_uncore_frequency, package.max_uncore_frequency);
+        sprintf(buf, "%ld # Uncore frequency. Available frequencies: %ld - %ld\n", package.max_uncore_frequency, package.min_uncore_frequency, package.max_uncore_frequency);
 
         if (write(fd, buf, strlen(buf)) == -1)
         {
@@ -779,6 +779,34 @@ int st_set_freq(const int core, int min_freq, int max_freq)
     return 0;
 }
 
+int st_set_uncore_freq(int min_freq, int max_freq)
+{
+    char buf[32] = {0};
+    char addr[128] = {0};
+    long min = 0;
+    long max = 0;
+    sprintf(addr, PACKAGE_UNCORE_MIN_FREQUENCY);
+    if (read_int_addr(addr, &min) == -1) 
+        return -1;
+
+    sprintf(addr, PACKAGE_UNCORE_MAX_FREQUENCY);
+    if (read_int_addr(addr, &max) == -1) 
+        return -1;
+
+    min_freq = MAX(min, MIN(min_freq, max));
+    max_freq = MAX(min, MIN(max_freq, max));
+
+    sprintf(buf, "%i", min_freq);
+    sprintf(addr, PACKAGE_UNCORE_MIN_FREQUENCY);
+    write_string_addr(addr, buf);
+
+    sprintf(buf, "%i", max_freq);
+    sprintf(addr, PACKAGE_UNCORE_MAX_FREQUENCY);
+    write_string_addr(addr, buf);
+    
+    return 0;
+}
+
 int st_apply(STConfig * config)
 {
     int ret = 0;
@@ -794,6 +822,7 @@ int st_apply(STConfig * config)
 
     // Check settings
     bool enable_latency_constraint = false;
+    bool enable_uncore_frequency = false;
     bool enable_governor = false;
     bool enable_c_sates = false;
     bool enable_frequency = false;
@@ -806,6 +835,8 @@ int st_apply(STConfig * config)
         enable_governor = true;
     if ( config->package.max_frequency && config->package.min_frequency )
         enable_frequency = true;
+    if ( config->package.max_uncore_frequency != -1 && config->package.min_uncore_frequency != -1 )
+        enable_uncore_frequency = true;
 
 
     // DMA
@@ -814,6 +845,10 @@ int st_apply(STConfig * config)
         pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint); // thread stops when lock is unlocked
         pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
     }
+
+    // Uncore frequency
+    if ( enable_uncore_frequency )
+        st_set_uncore_freq(config->uncore_frequency, config->uncore_frequency);
 
     // Setup C-States
 
@@ -876,6 +911,9 @@ int st_apply(STConfig * config)
         pthread_mutex_unlock(&latencyDMAThreadVals.stop_latency_constraint);
         pthread_join(dma_latency_thread, NULL);
     }
+
+    if ( enable_uncore_frequency )
+        st_set_uncore_freq(config->package.min_uncore_frequency, config->package.max_uncore_frequency);
 
     // stop governor
     if ( enable_governor )
