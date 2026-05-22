@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     }
 
     // ALLOWED OUTPUT FORMATS
-    const char * supported_outputs = ST_SUPPORTED_OUTPUT;
+    char * supported_outputs = ST_SUPPORTED_OUTPUT;
     char * chr_found = strchr(supported_outputs, output_mode); // if suggested output is not found in supported modes MACRO
     if ( ! chr_found )
     {
