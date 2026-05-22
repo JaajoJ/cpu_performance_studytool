@@ -912,6 +912,7 @@ int st_apply(STConfig * config)
         pthread_join(dma_latency_thread, NULL);
     }
 
+    // Uncore
     if ( enable_uncore_frequency )
         st_set_uncore_freq(config->package.min_uncore_frequency, config->package.max_uncore_frequency);
 
