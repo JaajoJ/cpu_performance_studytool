@@ -12,6 +12,8 @@
 
 // Addresses for stats
 #define CORE_STATE_TIME_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/time"
+#define CORE_STATE_ABOVE_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/above"
+#define CORE_STATE_BELOW_ADDR "/sys/devices/system/cpu/cpu%i/cpuidle/state%i/below"
 #define CORE_LATENCY_ADDR "/sys/devices/system/cpu/cpu%i/power/pm_qos_resume_latency_us"
 #define CORE_FREQ_ADDR "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_cur_freq"
 #define CORE_SCALING_MIN_FREQUENCY "/sys/devices/system/cpu/cpu%i/cpufreq/scaling_min_freq"
@@ -37,6 +39,8 @@
 typedef struct  
 {
     int idle_time[MAXIMUM_C_STATES]; // [0] == POLL: /sys/devices/system/cpu/cpuX/cpuidle/state*/time
+    int below[MAXIMUM_C_STATES]; 
+    int above[MAXIMUM_C_STATES]; 
     int current_frequency;
     long max_latency; // Maximum accepted latency: /sys/devices/system/cpu/cpuX/power/pm_qos_resume_latency_us
 } IdleCoreStats;

@@ -42,6 +42,24 @@ void st_print_package_stats(const PackageStats *pkg)
                    state,
                    core->idle_time[state]);
         }
+
+        printf("  Idle state above metric:\n");
+
+        for (int state = 0; state < pkg->available_idle_states; state++)
+        {
+            printf("    C%d : %d\n",
+                   state,
+                   core->above[state]);
+        }
+
+        printf("  Idle state below metric:\n");
+
+        for (int state = 0; state < pkg->available_idle_states; state++)
+        {
+            printf("    C%d : %d\n",
+                   state,
+                   core->below[state]);
+        }
     }
 
     printf("\n===========================\n");

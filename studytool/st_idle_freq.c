@@ -192,6 +192,30 @@ PackageStats st_get_package()
     return package;
 }
 
+int get_core_idle_below(long * c_state_idle_below, const int core_number, const int available_c_states)
+{
+    char addr_buf[128] = "";
+    for (int idle_state = 0; idle_state < available_c_states; ++ idle_state )
+    {
+        sprintf(addr_buf, CORE_STATE_BELOW_ADDR, core_number, idle_state);
+        read_int_addr(addr_buf,  &c_state_idle_below[idle_state]);
+    }
+    return 0;
+
+}
+
+int get_core_idle_above(long * c_state_idle_above, const int core_number, const int available_c_states)
+{
+    char addr_buf[128] = "";
+    for (int idle_state = 0; idle_state < available_c_states; ++ idle_state )
+    {
+        sprintf(addr_buf, CORE_STATE_ABOVE_ADDR, core_number, idle_state);
+        read_int_addr(addr_buf,  &c_state_idle_above[idle_state]);
+    }
+    return 0;
+
+}
+
 int get_core_idle(long * c_state_idle, const int core_number, const int available_c_states)
 {
     char addr_buf[128] = "";
@@ -227,12 +251,18 @@ int st_get_core_frequency(PackageStats * package_stats)
 int st_get_core_idle_delta(PackageStats * package_stats)
 {
     long c_states_time[MAXIMUM_CORES][MAXIMUM_C_STATES] = {0};
+    long c_states_above[MAXIMUM_CORES][MAXIMUM_C_STATES] = {0};
+    long c_states_below[MAXIMUM_CORES][MAXIMUM_C_STATES] = {0};
     long c_states_time_delta[MAXIMUM_C_STATES] = {0};
+    long c_states_above_delta[MAXIMUM_C_STATES] = {0};
+    long c_states_below_delta[MAXIMUM_C_STATES] = {0};
     long combined_time = 0;
 
     for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
     {
         get_core_idle(c_states_time[core_number], core_number, package_stats->available_idle_states);
+        get_core_idle_above(c_states_above[core_number], core_number, package_stats->available_idle_states);
+        get_core_idle_below(c_states_below[core_number], core_number, package_stats->available_idle_states);
     }
 
     sleep(5);
@@ -240,10 +270,14 @@ int st_get_core_idle_delta(PackageStats * package_stats)
     for (int core_number = 0; core_number < package_stats->all_cpus; ++core_number)
     {
         get_core_idle(c_states_time_delta, core_number, package_stats->available_idle_states);
+        get_core_idle_above(c_states_above_delta, core_number, package_stats->available_idle_states);
+        get_core_idle_below(c_states_below_delta, core_number, package_stats->available_idle_states);
 
         for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++idle_state)
         {
             c_states_time[core_number][idle_state] = c_states_time_delta[idle_state] - c_states_time[core_number][idle_state];
+            c_states_above[core_number][idle_state] = c_states_above_delta[idle_state] - c_states_above[core_number][idle_state];
+            c_states_below[core_number][idle_state] = c_states_below_delta[idle_state] - c_states_below[core_number][idle_state];
         }
     }
 
@@ -255,8 +289,12 @@ int st_get_core_idle_delta(PackageStats * package_stats)
     {
         combined_time = 0;
         for (int idle_state = 0; idle_state < package_stats->available_idle_states; ++idle_state)
+        {
+            package_stats->coreStats[core_number].below[idle_state] = c_states_below[core_number][idle_state];
+            package_stats->coreStats[core_number].above[idle_state] = c_states_above[core_number][idle_state];
             combined_time += c_states_time[core_number][idle_state];
-
+        }
+        
         if (combined_time)
         {
             long sum = 0;
