@@ -106,6 +106,17 @@ void st_print_package_stats_json(const PackageStats *pkg)
         sprintf(buf, "st.core.%i.freq_khz", core_number);
         print_json_key(buf, pkg->coreStats[core_number].current_frequency);
         printf(",");
+
+        // above / below metric
+        for ( int idle_state = 0; idle_state < pkg->available_idle_states; ++idle_state )
+        {
+            sprintf(buf, "st.core.%i.idle_state_above.%i", core_number, idle_state);
+            print_json_key(buf, pkg->coreStats[core_number].above[idle_state]);
+            printf(",");
+            sprintf(buf, "st.core.%i.idle_state_below.%i", core_number, idle_state);
+            print_json_key(buf, pkg->coreStats[core_number].below[idle_state]);
+            printf(",");
+        }
     }
 
     // PACKAGES metrics
