@@ -7,7 +7,7 @@
 
 // CONFIGS
 #define ST_CONFIG_DEFAULT_PATH "/opt/st_config.cfg"
-#define ST_CONFIG_DEFAULTS {200,{0},{0},{0},st_get_package()}
+#define ST_CONFIG_DEFAULTS {200,-1,{0},{0},{0},st_get_package()}
 #define ST_FREQ_STEP 200000
 
 // Addresses for stats
@@ -28,6 +28,11 @@
 #define PACKAGE_INTEL_PSTATE_DISABLE "/sys/devices/system/cpu/intel_pstate/status"
 #define PACKAGE_MAX_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define PACKAGE_MIN_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
+#define PACKAGE_UNCORE_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/current_freq_khz"
+#define PACKAGE_UNCORE_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/min_freq_khz"
+#define PACKAGE_UNCORE_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/max_freq_khz"
+#define PACKAGE_UNCORE_GET_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/initial_min_freq_khz"
+#define PACKAGE_UNCORE_GET_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/initial_max_freq_khz"
 
 #define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
 
@@ -54,12 +59,15 @@ typedef struct  {
     int available_idle_states;
     long max_frequency;
     long min_frequency;
+    long max_uncore_frequency;
+    long min_uncore_frequency;
     IdleCoreStats coreStats[MAXIMUM_CORES];
 } PackageStats;
 
 typedef struct 
 {
     int dma_latency_us;
+    int uncore_frequency;
     int core_target_c_state[MAXIMUM_CORES];
     int core_target_c_state_enforce[MAXIMUM_C_STATES];
     int core_target_frequency[MAXIMUM_CORES];
