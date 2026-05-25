@@ -195,6 +195,8 @@ PackageStats st_get_package()
 
     read_int_addr(PACKAGE_UNCORE_GET_MIN_FREQUENCY, &package.min_uncore_frequency);
 
+    read_int_addr(PACKAGE_UNCORE_CURRENT_FREQUENCY, &package.current_uncore_frequency);
+
 
     return package;
 }

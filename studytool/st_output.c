@@ -33,6 +33,7 @@ void st_print_package_stats(const PackageStats *pkg)
         printf("\nCPU %ld\n", cpu);
         printf("  Max latency : %ld us\n", core->max_latency);
         printf("  Frequency : %i kHz\n", core->current_frequency);
+        printf("  Uncore Frequency : %li kHz\n", pkg->current_uncore_frequency);
 
         printf("  Idle state times:\n");
 
@@ -130,6 +131,12 @@ void st_print_package_stats_json(const PackageStats *pkg)
     printf(",");
     sprintf(buf, "st.package.idle_state_avg.undetermined");
     print_json_key(buf, avg_idle_undetermined / pkg->all_cpus);
+
+    // Uncore
+    printf(",");
+    sprintf(buf, "st.package.current_uncore_freq");
+    print_json_key(buf, pkg->current_uncore_frequency);
+
 
     printf("}");
     printf("\n");

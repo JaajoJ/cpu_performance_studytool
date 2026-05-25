@@ -28,7 +28,7 @@
 #define PACKAGE_INTEL_PSTATE_DISABLE "/sys/devices/system/cpu/intel_pstate/status"
 #define PACKAGE_MAX_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define PACKAGE_MIN_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
-#define PACKAGE_UNCORE_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/current_freq_khz"
+#define PACKAGE_UNCORE_CURRENT_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/current_freq_khz"
 #define PACKAGE_UNCORE_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/min_freq_khz"
 #define PACKAGE_UNCORE_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/max_freq_khz"
 #define PACKAGE_UNCORE_GET_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/initial_min_freq_khz"
@@ -61,6 +61,7 @@ typedef struct  {
     long min_frequency;
     long max_uncore_frequency;
     long min_uncore_frequency;
+    long current_uncore_frequency;
     IdleCoreStats coreStats[MAXIMUM_CORES];
 } PackageStats;
 
