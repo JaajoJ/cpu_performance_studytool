@@ -28,11 +28,11 @@
 #define PACKAGE_INTEL_PSTATE_DISABLE "/sys/devices/system/cpu/intel_pstate/status"
 #define PACKAGE_MAX_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define PACKAGE_MIN_FREQUENCY "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
-#define PACKAGE_UNCORE_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/current_freq_khz"
-#define PACKAGE_UNCORE_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/min_freq_khz"
-#define PACKAGE_UNCORE_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/max_freq_khz"
-#define PACKAGE_UNCORE_GET_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/initial_min_freq_khz"
-#define PACKAGE_UNCORE_GET_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/initial_max_freq_khz"
+#define PACKAGE_UNCORE_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/current_freq_khz"
+#define PACKAGE_UNCORE_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/min_freq_khz"
+#define PACKAGE_UNCORE_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/max_freq_khz"
+#define PACKAGE_UNCORE_GET_MIN_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/initial_min_freq_khz"
+#define PACKAGE_UNCORE_GET_MAX_FREQUENCY "/sys/devices/system/cpu/intel_uncore_frequency/package_00_die_00/initial_max_freq_khz"
 
 #define PACKAGE_SUBSYSTEM_QOS_CPU_LATENCY_ADDR "/dev/cpu_dma_latency"
 
