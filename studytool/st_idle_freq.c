@@ -535,6 +535,7 @@ int st_get_config(STConfig * config, char * config_path)
         close(fd);
         return 1;
     }
+    printf("Configured DMA latency %i .\n", config->dma_latency_us);
 
     // Parse Uncore frequency
 
@@ -550,6 +551,7 @@ int st_get_config(STConfig * config, char * config_path)
         close(fd);
         return 1;
     }
+    printf("Configured CPU uncore %i kHz target.\n", config->uncore_frequency);
 
     // Parse target C-states
 
