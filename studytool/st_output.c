@@ -23,7 +23,8 @@ void st_print_package_stats(const PackageStats *pkg)
     printf("Online CPUs        : %ld\n", pkg->online_cpus);
     printf("Total CPUs         : %ld\n", pkg->all_cpus);
     printf("Available C-states : %i\n", pkg->available_idle_states);
-
+    printf("Uncore Frequency   : %li kHz\n", pkg->current_uncore_frequency);
+    
     printf("\nPer-core idle statistics:\n");
 
     for (long cpu = 0; cpu < pkg->all_cpus && cpu < MAXIMUM_CORES; cpu++)
@@ -33,7 +34,6 @@ void st_print_package_stats(const PackageStats *pkg)
         printf("\nCPU %ld\n", cpu);
         printf("  Max latency : %ld us\n", core->max_latency);
         printf("  Frequency : %i kHz\n", core->current_frequency);
-        printf("  Uncore Frequency : %li kHz\n", pkg->current_uncore_frequency);
 
         printf("  Idle state times:\n");
 
