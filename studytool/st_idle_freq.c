@@ -846,13 +846,17 @@ int st_apply(STConfig * config)
     // DMA
     if ( enable_latency_constraint )
     { 
+        printf("Setting DMA latency constraints \n");
         pthread_mutex_lock(&latencyDMAThreadVals.stop_latency_constraint); // thread stops when lock is unlocked
         pthread_create(&dma_latency_thread, NULL, set_dma_latency_thread, &latencyDMAThreadVals); 
     }
 
     // Uncore frequency
     if ( enable_uncore_frequency )
+    {
+        printf("Setting uncore constraints\n");
         st_set_uncore_freq(config->uncore_frequency, config->uncore_frequency);
+    }
 
     // Setup C-States
 
