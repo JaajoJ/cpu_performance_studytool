@@ -538,7 +538,7 @@ int st_get_config(STConfig * config, char * config_path)
     printf("Configured DMA latency %i .\n", config->dma_latency_us);
 
     // Parse Uncore frequency
-
+    memset(read_buf, 0, sizeof(read_buf));
     if (read_line(fd, read_buf, 512))
     {
         fprintf(stderr, "Line length too big for DMA latency.\n");
