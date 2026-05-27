@@ -790,13 +790,13 @@ int st_set_uncore_freq(int min_freq, int max_freq)
     long hw_max;
 
     snprintf(addr, sizeof(addr), "%s",
-             PACKAGE_UNCORE_MIN_FREQUENCY);
+             PACKAGE_UNCORE_GET_MIN_FREQUENCY);
 
     if (read_int_addr(addr, &hw_min) == -1)
         return -1;
 
     snprintf(addr, sizeof(addr), "%s",
-             PACKAGE_UNCORE_MAX_FREQUENCY);
+             PACKAGE_UNCORE_GET_MAX_FREQUENCY);
 
     if (read_int_addr(addr, &hw_max) == -1)
         return -1;
