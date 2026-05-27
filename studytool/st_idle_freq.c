@@ -782,35 +782,49 @@ int st_set_freq(const int core, int min_freq, int max_freq)
     write_string_addr(addr, buf);
     return 0;
 }
-
 int st_set_uncore_freq(int min_freq, int max_freq)
 {
-    char buf[32] = {0};
-    char addr[128] = {0};
-    long min = 0;
-    long max = 0;
-    sprintf(addr, PACKAGE_UNCORE_MIN_FREQUENCY);
-    if (read_int_addr(addr, &min) == -1) 
+    char buf[32];
+    char addr[128];
+    long hw_min;
+    long hw_max;
+
+    snprintf(addr, sizeof(addr), "%s",
+             PACKAGE_UNCORE_MIN_FREQUENCY);
+
+    if (read_int_addr(addr, &hw_min) == -1)
         return -1;
 
-    sprintf(addr, PACKAGE_UNCORE_MAX_FREQUENCY);
-    if (read_int_addr(addr, &max) == -1) 
+    snprintf(addr, sizeof(addr), "%s",
+             PACKAGE_UNCORE_MAX_FREQUENCY);
+
+    if (read_int_addr(addr, &hw_max) == -1)
         return -1;
 
-    min_freq = MAX(min, MIN(min_freq, max));
-    max_freq = MAX(min, MIN(max_freq, max));
+    min_freq = MAX(hw_min, MIN(min_freq, hw_max));
+    max_freq = MAX(hw_min, MIN(max_freq, hw_max));
 
-    sprintf(buf, "%i", min_freq);
-    sprintf(addr, PACKAGE_UNCORE_MIN_FREQUENCY);
-    write_string_addr(addr, buf);
+    if (min_freq > max_freq)
+        return -1;
 
-    sprintf(buf, "%i", max_freq);
-    sprintf(addr, PACKAGE_UNCORE_MAX_FREQUENCY);
-    write_string_addr(addr, buf);
-    
+    snprintf(buf, sizeof(buf), "%d", min_freq);
+
+    snprintf(addr, sizeof(addr), "%s",
+             PACKAGE_UNCORE_MIN_FREQUENCY);
+
+    if (write_string_addr(addr, buf) == -1)
+        return -1;
+
+    snprintf(buf, sizeof(buf), "%d", max_freq);
+
+    snprintf(addr, sizeof(addr), "%s",
+             PACKAGE_UNCORE_MAX_FREQUENCY);
+
+    if (write_string_addr(addr, buf) == -1)
+        return -1;
+
     return 0;
 }
-
 int st_apply(STConfig * config)
 {
     int ret = 0;
