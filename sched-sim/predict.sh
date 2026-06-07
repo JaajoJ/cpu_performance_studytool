@@ -18,10 +18,10 @@ else
         echo "Error: perf not found" >&2
         exit 1
     fi
-    sudo perf sched record -o $OUTPUT_DIR/perf.data -- sleep 120
+    sudo perf sched record -o $OUTPUT_DIR/perf.data -- sleep 60
     
     if command -v powertop &> /dev/null; then
-        sudo powertop --time=120 --html=$OUTPUT_DIR/report.html
+        sudo powertop --time=60 --html=$OUTPUT_DIR/report.html
     fi
 
     sudo chown $USER:$USER $OUTPUT_DIR/*

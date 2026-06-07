@@ -85,7 +85,7 @@ def simulate_governor(cpu_idx, c_states_dict):
 def main():
     cpu_indices = [0, 1, 2, 3, 4, 5, 6, 7]
 
-    with ProcessPoolExecutor(max_workers=8) as executor:
+    with ProcessPoolExecutor(max_workers=4) as executor:
         futures = [
             executor.submit(simulate_governor, cpu_idx, intel_skylake_c_states)
             for cpu_idx in cpu_indices

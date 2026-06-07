@@ -152,7 +152,8 @@ def _tick_nohz_get_sleep_length(rows: list, start_idx: int, cpu: int, timestamp:
         if task == '<idle>':
             found_idle = True
             continue
-        if found_idle and any(task.startswith(t) for t in NOHZ_TASKS):
+        #if found_idle and any(task.startswith(t) for t in NOHZ_TASKS):
+        if found_idle and task is not "<idle>": #any(task.startswith(t) for t in NOHZ_TASKS):
             start_ms = float(row['time']) - float(row['run_time_ms'])
             delta_ms = start_ms - timestamp
             return int(delta_ms * 1_000_000)  # ms → ns
