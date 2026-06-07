@@ -1,12 +1,20 @@
 import csv
 from src.states import intel_skylake_c_states
+from src.states import intel_sapphire_rapids_c_states
 from src.parser import parse_timehist
 from src.governors.menu import menu
+from concurrent.futures import ProcessPoolExecutor
+import time
 
 input_file  = "./.tmp/timehist"
 output_file = "./.tmp/timehist.csv"
 
+if parse_timehist(input_file, output_file):
+        print(f"Failed to parse {input_file}")
+        exit()
+
 def simulate_governor(cpu_idx, c_states_dict):
+    time.sleep(cpu_idx + 1)
     CPU = cpu_idx
     NSEC_PER_MSEC = 1_000_000
     TICK_TASKS = ('rcu_', 'migration/', 'ksoftirqd/', 'kworker/')
@@ -15,11 +23,6 @@ def simulate_governor(cpu_idx, c_states_dict):
     c_states_entered = [0] * len(c_states_dict.keys())
     c_states_residency_ms = [0] * len(c_states_dict.keys())
 
-
-
-    if parse_timehist(input_file, output_file):
-        print(f"Failed to parse {input_file}")
-        exit()
 
     with open(output_file, newline='') as f:
         all_rows = list(csv.DictReader(f))
@@ -62,6 +65,7 @@ def simulate_governor(cpu_idx, c_states_dict):
                     tick_wakeup       = tick_wu,
                 )
                 in_idle = False
+    print(" - " * 10)
     print(f"{CPU} - CPU summary")
     print(" - " * 10)
     for key in c_states_dict:
@@ -70,4 +74,19 @@ def simulate_governor(cpu_idx, c_states_dict):
         print(f"        Residency (ms): {c_states_residency_ms[c_states_dict[key]['idx']]:.3f}")
         print(f"        Relative res.:  {100 * c_states_residency_ms[c_states_dict[key]['idx']] / (sum(c_states_residency_ms)):.3f}%")
 
-simulate_governor(0, intel_skylake_c_states)
+#simulate_governor(0, intel_skylake_c_states)
+
+
+def main():
+    cpu_indices = [0, 1, 2, 3, 4, 5, 6, 7]
+
+    with ProcessPoolExecutor(max_workers=8) as executor:
+        futures = [
+            executor.submit(simulate_governor, cpu_idx, intel_skylake_c_states)
+            for cpu_idx in cpu_indices
+        ]
+
+        results = [f.result() for f in futures]
+
+if __name__ == "__main__":
+    main()
