@@ -1,16 +1,17 @@
 from src.states import *
 
 class governor:
-    def __init__(self, select, reflect, memory):
-        self.select = select
-        self.reflect = reflect
-        self.memory = memory
+    def __init__(self, select_func, reflect_func, memory_dict, states_dict):
+        self.select = select_func
+        self.reflect = reflect_func
+        self.memory = memory_dict
+        self.states = states_dict
 
     def reflect(self):
-        self.select(self.memory)
+        self.select(self.memory, self.states_dict)
 
     def select(self):
-        self.reflect(self.memory)
+        self.reflect(self.memory, self.states_dict)
 
 
 class idle_governor:
