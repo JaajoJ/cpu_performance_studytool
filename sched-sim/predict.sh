@@ -32,4 +32,4 @@ fi
 
 perf sched timehist -i $OUTPUT_DIR/perf.data > $OUTPUT_DIR/timehist
 perf sched map -i $OUTPUT_DIR/perf.data > $OUTPUT_DIR/map
-python3 src/parse-data.py
+python3 main.py
