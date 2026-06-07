@@ -22,6 +22,7 @@ def simulate_governor(cpu_idx, c_states_dict):
     # Summary values
     c_states_entered = [0] * len(c_states_dict.keys())
     c_states_residency_ms = [0] * len(c_states_dict.keys())
+    poll_residency_ms = 0
 
 
     with open(output_file, newline='') as f:
@@ -65,14 +66,18 @@ def simulate_governor(cpu_idx, c_states_dict):
                     tick_wakeup       = tick_wu,
                 )
                 in_idle = False
+                poll_residency_ms += run_ms
+
     print(" - " * 10)
     print(f"{CPU} - CPU summary")
     print(" - " * 10)
+    print(f"        Polling ms: {poll_residency_ms}")
+    print(f"        Relative res.:  {100 * poll_residency_ms / (sum(c_states_residency_ms) + poll_residency_ms):.3f}%")
     for key in c_states_dict:
         print("    " + key + ":")
         print(f"        Entered:        {c_states_entered[c_states_dict[key]['idx']]}")
         print(f"        Residency (ms): {c_states_residency_ms[c_states_dict[key]['idx']]:.3f}")
-        print(f"        Relative res.:  {100 * c_states_residency_ms[c_states_dict[key]['idx']] / (sum(c_states_residency_ms)):.3f}%")
+        print(f"        Relative res.:  {100 * c_states_residency_ms[c_states_dict[key]['idx']] / (sum(c_states_residency_ms) + poll_residency_ms):.3f}%")
 
 #simulate_governor(0, intel_skylake_c_states)
 

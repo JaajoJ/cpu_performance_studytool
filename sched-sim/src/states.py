@@ -1,7 +1,7 @@
 # Intel target residencies: https://github.com/torvalds/linux/blob/master/drivers/idle/intel_idle.c
 
 intel_skylake_c_states = {
-    "POLL": {
+    "C0": {
             "idx": 0, 
             "exit_latency": 0, 
             "target_residency": 0
@@ -49,7 +49,7 @@ intel_skylake_c_states = {
 }
 
 intel_sapphire_rapids_c_states = {
-    "POLL": {
+    "C0": {
             "idx": 0, 
             "exit_latency": 0, 
             "target_residency": 0
