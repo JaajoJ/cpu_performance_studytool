@@ -120,7 +120,13 @@ def report_csv():
 
 
 def estimate_prediction_linear():
-    pass
+    # Linear prediction algorithm:
+    #           Y_hat(t) = SUM(a(i) x Y(t - i))
+    #               a: the coefficients
+    #               Y: past values
+
+    # Coefficients a
+    #           M x = y
 
 def estimate_prediction_fourier():
     with open(output_file, newline='') as f:

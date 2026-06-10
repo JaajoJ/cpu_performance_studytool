@@ -28,7 +28,7 @@ def simulate_governor(cpu_idx, c_states_dict):
     with open(output_file, newline='') as f:
         reader = csv.DictReader(f)
         all_rows = [row for row in reader if row['cpu'] == str(cpu_idx)]
-
+    all_rows = all_rows[:2000]
     gov = menu(cpu_states_dict=c_states_dict, cpu_idx=CPU, rows=all_rows)
 
     in_idle       = False
