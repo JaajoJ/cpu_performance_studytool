@@ -126,7 +126,7 @@ def estimate_prediction_fourier():
     with open(output_file, newline='') as f:
         all_rows = list(csv.DictReader(f))
 
-    x = np.array([float(r['run_time_ms']) for r in all_rows])
+    x = np.array([float(r['run_time_ms']) for r in all_rows if r['task'] == '<idle>'])
     x = x / x.mean()
 
     X   = np.fft.rfft(x)

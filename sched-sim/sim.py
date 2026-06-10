@@ -24,9 +24,10 @@ def simulate_governor(cpu_idx, c_states_dict):
     c_states_residency_ms = [0] * len(c_states_dict.keys())
     poll_residency_ms = 0
 
-
+    all_rows = []
     with open(output_file, newline='') as f:
-        all_rows = list(csv.DictReader(f))
+        reader = csv.DictReader(f)
+        all_rows = [row for row in reader if row['cpu'] == str(cpu_idx)]
 
     gov = menu(cpu_states_dict=c_states_dict, cpu_idx=CPU, rows=all_rows)
 
@@ -83,9 +84,10 @@ def simulate_governor(cpu_idx, c_states_dict):
 
 
 def main():
-    cpu_indices = [0, 1, 2, 3, 4, 5, 6, 7]
+    #cpu_indices = [0, 1, 2, 3, 4, 5, 6, 7]
+    cpu_indices=[i for i in range(0,64)]
 
-    with ProcessPoolExecutor(max_workers=4) as executor:
+    with ProcessPoolExecutor(max_workers=6) as executor:
         futures = [
             executor.submit(simulate_governor, cpu_idx, intel_skylake_c_states)
             for cpu_idx in cpu_indices
