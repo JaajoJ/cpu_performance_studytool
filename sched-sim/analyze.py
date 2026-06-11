@@ -352,8 +352,8 @@ if __name__ == "__main__":
     #report_csv()
     #estimate_prediction_fourier()
     core_data_predictions = estimate_prediction_linear(
-        samplesize=12,
-        p=5,
+        samplesize=30,
+        p=7,
         max_data=100000
     )
     #print(core_data_predictions[0]["measurements"], core_data_predictions[0]["predictions"])
