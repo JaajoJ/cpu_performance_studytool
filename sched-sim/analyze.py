@@ -205,7 +205,7 @@ def estimate_prediction_linear(samplesize = 30, p = 3, max_data=1000) -> list:
             )
             predictions.append( prediction)
         
-        core_data_predictions[core] = {"predictions": predictions[1:-1], "measurements": actual[1:]}
+        core_data_predictions[core] = {"predictions": predictions[sample_size:-1], "measurements": actual[sample_size:]}
 
     return core_data_predictions
 
@@ -279,6 +279,53 @@ def plot_predictions(data, figsize_per_core=(12, 3)):
     draw(0)
     plt.show()
 
+def summarize_predictions(core_data_predictions):
+
+    print(
+        f"{'Core':<6} {'N':>6} {'MAE':>12} {'RMSE':>12} "
+        f"{'Bias':>12} {'MAPE %':>12} {'Corr':>12}"
+    )
+
+    print("-" * 80)
+
+    for core, data in core_data_predictions.items():
+
+        pred = np.asarray(data["predictions"], dtype=float)
+        meas = np.asarray(data["measurements"], dtype=float)
+
+        n = min(len(pred), len(meas))
+
+        pred = pred[:n]
+        meas = meas[:n]
+
+        error = pred - meas
+
+        mae = np.mean(np.abs(error))
+        rmse = np.sqrt(np.mean(error ** 2))
+        bias = np.mean(error)
+
+        nonzero = meas != 0
+        if np.any(nonzero):
+            mape = np.mean(
+                np.abs(error[nonzero]) / meas[nonzero]
+            ) * 100
+        else:
+            mape = np.nan
+
+        corr = (
+            np.corrcoef(meas, pred)[0, 1]
+            if n > 1 else np.nan
+        )
+
+        print(
+            f"{core:<6} {n:>6} "
+            f"{mae:>12.3f} "
+            f"{rmse:>12.3f} "
+            f"{bias:>12.3f} "
+            f"{mape:>12.2f} "
+            f"{corr:>12.3f}"
+        )
+
 def estimate_prediction_fourier():
     with open(output_file, newline='') as f:
         all_rows = list(csv.DictReader(f))
@@ -305,9 +352,10 @@ if __name__ == "__main__":
     #report_csv()
     #estimate_prediction_fourier()
     core_data_predictions = estimate_prediction_linear(
-        samplesize=30,
-        p=3,
-        max_data=1000000
+        samplesize=12,
+        p=5,
+        max_data=100000
     )
     #print(core_data_predictions[0]["measurements"], core_data_predictions[0]["predictions"])
+    summarize_predictions(core_data_predictions)
     plot_predictions(core_data_predictions)
