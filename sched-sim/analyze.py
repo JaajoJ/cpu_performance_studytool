@@ -3,6 +3,9 @@ from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 
+import matplotlib.widgets as widgets
+import numpy as np
+
 output_file = "./.tmp/timehist.csv"
 
 
@@ -119,7 +122,7 @@ def report_csv():
     print(f"\n{sep}\n")
 
 
-def estimate_prediction_linear():
+def estimate_prediction_linear(samplesize = 30, p = 3, max_data=1000) -> list:
     # Linear prediction algorithm:
     #           Y_hat(t) = SUM(a(i) x Y(t - i))
     #               a: the coefficients
@@ -127,6 +130,154 @@ def estimate_prediction_linear():
 
     # Coefficients a
     #           M x = y
+
+    with open(output_file, newline='') as f:
+        all_rows = list(csv.DictReader(f))
+    
+    core_data = {}
+    core_data_predictions = {}
+
+    for row in all_rows[:max_data]:
+        cpu = int(row["cpu"])
+        if cpu not in core_data:
+            core_data[cpu] = []
+        core_data[cpu].append(row)
+    
+    sample_size = samplesize
+    samples = [0] * sample_size
+    p = p
+
+    def autocorr(x, lag):
+        x = np.asarray(x)
+        #x = x - x.mean() mean 
+        n = len(x)
+        return np.dot(x[:n-lag], x[lag:])
+
+
+    for core in core_data.keys():
+        #print(core_data[core])
+        predictions = [0]
+        samples = [0] * sample_size
+        actual = []
+        #print(core)
+        for data_point in core_data[core]:
+            if data_point['task'] != '<idle>':
+                continue
+            #print("data")
+            actual.append(float(data_point['run_time_ms']))
+
+            # 1) Offset samples
+            samples += [samples.pop(0)]
+            samples[-1] = float(data_point['run_time_ms'])
+            
+            # 2) Calculating normalized autocorrelation coefficients
+            r=[]
+            for i in range(p + 1):
+                r.append(autocorr(samples, i))
+
+            E_value = r[0] # E0 = R0
+            
+            a_j = [0.0] * p
+
+            # 3) Recursively calculate the coefficients using levinson-durbin method
+            for i in range(1, p + 1):
+                
+                # 3.1) Calculate sums for reflection coefficient also 38b
+                a_j_R = sum([ a_j[j - 1] * r[i - j] for j in range(1, i)])
+
+                # 3.2) Calculate reflection coefficient
+                k_i = - (r[i] + a_j_R) / E_value
+
+                a_prev = a_j[:]
+
+                a_j[i - 1] = k_i
+
+                # 3.3) Calculate the updated coefficients
+                for i2 in range(1, i):
+                    a_j[i2-1] = a_prev[i2-1] + k_i * a_prev[i - i2 - 1]
+
+                E_value = (1 - k_i ** 2) * E_value
+            
+            # 4) prediction using the coefficients
+            prediction = -sum(
+                a_j[i] * samples[-(i + 1)]
+                for i in range(p)
+            )
+            predictions.append( prediction)
+        
+        core_data_predictions[core] = {"predictions": predictions[1:-1], "measurements": actual[1:]}
+
+    return core_data_predictions
+
+def plot_predictions(data, figsize_per_core=(12, 3)):
+    """
+    data = {
+        core_id: {
+            "predictions":  [values],
+            "measurements": [values]
+        }
+    }
+    Interactive single-core viewer with prev/next navigation.
+    """
+    
+
+    cores = sorted(data.keys())
+    state = {"idx": 0}
+
+    fig, axes = plt.subplots(1, 2, figsize=figsize_per_core)
+    fig.subplots_adjust(bottom=0.2)
+
+    ax_prev = fig.add_axes([0.3, 0.05, 0.1,  0.07])
+    ax_next = fig.add_axes([0.6, 0.05, 0.1,  0.07])
+    ax_info = fig.add_axes([0.41, 0.05, 0.18, 0.07])
+    ax_info.axis("off")
+
+    btn_prev = widgets.Button(ax_prev, "◀ Prev")
+    btn_next = widgets.Button(ax_next, "Next ▶")
+    info_text = ax_info.text(0.5, 0.5, "", ha="center", va="center",
+                             fontsize=11, transform=ax_info.transAxes)
+
+    def draw(idx):
+        core = cores[idx]
+        actual = np.asarray(data[core]["measurements"], dtype=float)
+        pred   = np.asarray(data[core]["predictions"],  dtype=float)
+        n      = min(len(actual), len(pred))
+        actual, pred = actual[:n], pred[:n]
+        error  = np.abs(actual - pred)
+        mae    = np.mean(error)
+        rmse   = np.sqrt(np.mean((actual - pred) ** 2))
+
+        for ax in axes:
+            ax.cla()
+
+        axes[0].plot(actual, label="Actual")
+        axes[0].plot(pred,   label="Predicted", linestyle="--")
+        axes[0].set_title(f"Core {core}  |  MAE={mae:.2f}  RMSE={rmse:.2f}")
+        axes[0].set_xlabel("Time step")
+        axes[0].grid(True, alpha=0.3)
+        axes[0].legend()
+
+        axes[1].plot(error, color="tab:red", alpha=0.7)
+        axes[1].set_title(f"Core {core}  —  Absolute error")
+        axes[1].set_xlabel("Time step")
+        axes[1].grid(True, alpha=0.3)
+
+        info_text.set_text(f"{idx + 1} / {len(cores)}")
+        fig.canvas.draw_idle()
+
+    def on_prev(_):
+        state["idx"] = (state["idx"] - 1) % len(cores)
+        draw(state["idx"])
+
+    def on_next(_):
+        state["idx"] = (state["idx"] + 1) % len(cores)
+        draw(state["idx"])
+
+    btn_prev.on_clicked(on_prev)
+    btn_next.on_clicked(on_next)
+
+    draw(0)
+    plt.show()
 
 def estimate_prediction_fourier():
     with open(output_file, newline='') as f:
@@ -151,6 +302,12 @@ def estimate_prediction_fourier():
     plt.show()
 
 if __name__ == "__main__":
-    report_csv()
-    estimate_prediction_fourier()
-    estimate_prediction_linear()
+    #report_csv()
+    #estimate_prediction_fourier()
+    core_data_predictions = estimate_prediction_linear(
+        samplesize=30,
+        p=3,
+        max_data=1000000
+    )
+    #print(core_data_predictions[0]["measurements"], core_data_predictions[0]["predictions"])
+    plot_predictions(core_data_predictions)
