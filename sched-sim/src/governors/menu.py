@@ -32,7 +32,7 @@ MAX_INTERESTING = 50_000 * NSEC_PER_USEC   # 50 ms in ns
 # ------------------------------------------------------------------------------
 
 
-def _get_typical_interval_ns(memory_dict: dict) -> int:
+def get_typical_interval_ns(memory_dict: dict) -> int:
     """
     Try to detect a repeating wakeup pattern by examining the last INTERVALS
     residency samples.  Returns the estimated interval in *nanoseconds*
@@ -352,7 +352,7 @@ class menu(governor_cls):
         # ------------------------------------------------------------------
         # 2. Predict the next wakeup interval.
         # ------------------------------------------------------------------
-        predicted_ns = _get_typical_interval_ns(data)
+        predicted_ns = get_typical_interval_ns(data)
 
         if predicted_ns > RESIDENCY_THRESHOLD_NS or _tick_nohz_tick_stopped():
             # Use the time-to-next-timer as a cross-check / refinement.

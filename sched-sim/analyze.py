@@ -121,8 +121,7 @@ def report_csv():
 
     print(f"\n{sep}\n")
 
-
-def estimate_prediction_linear(samplesize = 30, p = 3, max_data=1000) -> list:
+def estimate_prediction_linear(samplesize = 30, p = 3, max_data=1000) -> dict:
     # Linear prediction algorithm:
     #           Y_hat(t) = SUM(a(i) x Y(t - i))
     #               a: the coefficients
